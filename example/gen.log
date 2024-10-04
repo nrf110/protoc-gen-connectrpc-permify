@@ -1,0 +1,245 @@
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:40: checking field Resources
+2024/10/04 01:09:08 resource.go:51: Resources is a message
+2024/10/04 01:09:08 resource.go:53: Resources is a repeated message
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:40: checking field Resources
+2024/10/04 01:09:08 resource.go:51: Resources is a message
+2024/10/04 01:09:08 resource.go:53: Resources is a repeated message
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:40: checking field Resources
+2024/10/04 01:09:08 resource.go:51: Resources is a message
+2024/10/04 01:09:08 resource.go:53: Resources is a repeated message
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:40: checking field Mapped
+2024/10/04 01:09:08 resource.go:43: Mapped is a map of messages
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:40: checking field Mapped
+2024/10/04 01:09:08 resource.go:43: Mapped is a map of messages
+2024/10/04 01:09:08 resource.go:40: checking field Resources
+2024/10/04 01:09:08 resource.go:43: Resources is a map of messages
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:09:08 resource.go:21: finding resource
+2024/10/04 01:09:08 resource.go:40: checking field Resource
+2024/10/04 01:09:08 resource.go:51: Resource is a message
+2024/10/04 01:09:08 resource.go:28: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:57: checking field Resources
+2024/10/04 01:14:17 resource.go:68: Resources is a message
+2024/10/04 01:14:17 resource.go:70: Resources is a repeated message
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:57: checking field Resources
+2024/10/04 01:14:17 resource.go:68: Resources is a message
+2024/10/04 01:14:17 resource.go:70: Resources is a repeated message
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:57: checking field Resources
+2024/10/04 01:14:17 resource.go:68: Resources is a message
+2024/10/04 01:14:17 resource.go:70: Resources is a repeated message
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:57: checking field Mapped
+2024/10/04 01:14:17 resource.go:60: Mapped is a map of messages
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:57: checking field Mapped
+2024/10/04 01:14:17 resource.go:60: Mapped is a map of messages
+2024/10/04 01:14:17 resource.go:57: checking field Resources
+2024/10/04 01:14:17 resource.go:60: Resources is a map of messages
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:14:17 resource.go:38: finding resource
+2024/10/04 01:14:17 resource.go:57: checking field Resource
+2024/10/04 01:14:17 resource.go:68: Resource is a message
+2024/10/04 01:14:17 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:57: checking field Resources
+2024/10/04 01:16:07 resource.go:68: Resources is a message
+2024/10/04 01:16:07 resource.go:70: Resources is a repeated message
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:57: checking field Resources
+2024/10/04 01:16:07 resource.go:68: Resources is a message
+2024/10/04 01:16:07 resource.go:70: Resources is a repeated message
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:57: checking field Resources
+2024/10/04 01:16:07 resource.go:68: Resources is a message
+2024/10/04 01:16:07 resource.go:70: Resources is a repeated message
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:57: checking field Mapped
+2024/10/04 01:16:07 resource.go:60: Mapped is a map of messages
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:57: checking field Mapped
+2024/10/04 01:16:07 resource.go:60: Mapped is a map of messages
+2024/10/04 01:16:07 resource.go:57: checking field Resources
+2024/10/04 01:16:07 resource.go:60: Resources is a map of messages
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:16:07 resource.go:38: finding resource
+2024/10/04 01:16:07 resource.go:57: checking field Resource
+2024/10/04 01:16:07 resource.go:68: Resource is a message
+2024/10/04 01:16:07 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:57: checking field Resources
+2024/10/04 01:16:18 resource.go:68: Resources is a message
+2024/10/04 01:16:18 resource.go:70: Resources is a repeated message
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:57: checking field Resources
+2024/10/04 01:16:18 resource.go:68: Resources is a message
+2024/10/04 01:16:18 resource.go:70: Resources is a repeated message
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:57: checking field Resources
+2024/10/04 01:16:18 resource.go:68: Resources is a message
+2024/10/04 01:16:18 resource.go:70: Resources is a repeated message
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:57: checking field Mapped
+2024/10/04 01:16:18 resource.go:60: Mapped is a map of messages
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:57: checking field Mapped
+2024/10/04 01:16:18 resource.go:60: Mapped is a map of messages
+2024/10/04 01:16:18 resource.go:57: checking field Resources
+2024/10/04 01:16:18 resource.go:60: Resources is a map of messages
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:16:18 resource.go:38: finding resource
+2024/10/04 01:16:18 resource.go:57: checking field Resource
+2024/10/04 01:16:18 resource.go:68: Resource is a message
+2024/10/04 01:16:18 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:57: checking field Resources
+2024/10/04 01:17:09 resource.go:68: Resources is a message
+2024/10/04 01:17:09 resource.go:70: Resources is a repeated message
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:57: checking field Resources
+2024/10/04 01:17:09 resource.go:68: Resources is a message
+2024/10/04 01:17:09 resource.go:70: Resources is a repeated message
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:57: checking field Resources
+2024/10/04 01:17:09 resource.go:68: Resources is a message
+2024/10/04 01:17:09 resource.go:70: Resources is a repeated message
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:57: checking field Mapped
+2024/10/04 01:17:09 resource.go:60: Mapped is a map of messages
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:57: checking field Mapped
+2024/10/04 01:17:09 resource.go:60: Mapped is a map of messages
+2024/10/04 01:17:09 resource.go:57: checking field Resources
+2024/10/04 01:17:09 resource.go:60: Resources is a map of messages
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:17:09 resource.go:38: finding resource
+2024/10/04 01:17:09 resource.go:57: checking field Resource
+2024/10/04 01:17:09 resource.go:68: Resource is a message
+2024/10/04 01:17:09 resource.go:45: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:56: checking field Resources
+2024/10/04 01:18:10 resource.go:67: Resources is a message
+2024/10/04 01:18:10 resource.go:69: Resources is a repeated message
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:56: checking field Resources
+2024/10/04 01:18:10 resource.go:67: Resources is a message
+2024/10/04 01:18:10 resource.go:69: Resources is a repeated message
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:56: checking field Resources
+2024/10/04 01:18:10 resource.go:67: Resources is a message
+2024/10/04 01:18:10 resource.go:69: Resources is a repeated message
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:56: checking field Mapped
+2024/10/04 01:18:10 resource.go:59: Mapped is a map of messages
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:56: checking field Mapped
+2024/10/04 01:18:10 resource.go:59: Mapped is a map of messages
+2024/10/04 01:18:10 resource.go:56: checking field Resources
+2024/10/04 01:18:10 resource.go:59: Resources is a map of messages
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:18:10 resource.go:37: finding resource
+2024/10/04 01:18:10 resource.go:56: checking field Resource
+2024/10/04 01:18:10 resource.go:67: Resource is a message
+2024/10/04 01:18:10 resource.go:44: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:41: checking field Resources
+2024/10/04 01:24:49 resource.go:52: Resources is a message
+2024/10/04 01:24:49 resource.go:54: Resources is a repeated message
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResource
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:41: checking field Resources
+2024/10/04 01:24:49 resource.go:52: Resources is a message
+2024/10/04 01:24:49 resource.go:54: Resources is a repeated message
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:41: checking field Resources
+2024/10/04 01:24:49 resource.go:52: Resources is a message
+2024/10/04 01:24:49 resource.go:54: Resources is a repeated message
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".RepeatedResourceWithRepeatedIds
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:41: checking field Mapped
+2024/10/04 01:24:49 resource.go:44: Mapped is a map of messages
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:41: checking field Mapped
+2024/10/04 01:24:49 resource.go:44: Mapped is a map of messages
+2024/10/04 01:24:49 resource.go:41: checking field Resources
+2024/10/04 01:24:49 resource.go:44: Resources is a map of messages
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResourceWithMappedIds
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".PublicRequest
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceRequest
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".ResourceWithIdRequest
+2024/10/04 01:24:49 resource.go:22: finding resource
+2024/10/04 01:24:49 resource.go:41: checking field Resource
+2024/10/04 01:24:49 resource.go:52: Resource is a message
+2024/10/04 01:24:49 resource.go:29: found resource type in "\"github.com/example/example-service/internal/gen/proto/example/v1\"".NestedResource

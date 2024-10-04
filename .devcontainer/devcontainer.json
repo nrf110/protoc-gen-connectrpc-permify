@@ -1,0 +1,23 @@
+{
+  "name": "protoc-gen-connectrpc-permit",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "capAdd": ["SYS_PTRACE"],
+  "hostRequirements": {
+    "memory": "4gb"
+  },
+  "postCreateCommand": "go version",
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "customizations": {
+    "jetbrains": {
+      "backend": "GoLand",
+      "plugins": [
+        "com.github.intellij.ginkgo"
+      ]
+    }
+  }
+}
+

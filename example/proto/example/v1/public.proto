@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package example.v1;
+
+option go_package = "github.com/example/example-service/internal/gen/proto/example/v1;examplev1";
+
+import "nrf110/permit/v1/permit.proto";
+import "proto/example/v1/common.proto";
+
+message PublicRequest {
+  option (nrf110.permit.v1.resource_type) = "Public";
+
+  string name = 1;
+}
+
+service OrganizationService {
+  rpc Create(PublicRequest) returns (Response) {
+      option (nrf110.permit.v1.public) = true;
+  }
+}
