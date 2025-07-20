@@ -1,7 +1,15 @@
+.PHONY: clean
 clean:
 	rm -rf ./bin
-sync:
+
+.PHONY: update
+update:
 	go mod tidy
-build: clean sync
+
+.PHONY: test
+test: clean update
+	go test -v ./...
+
+build: clean update
 	mkdir -p ./bin
 	go build -o ./bin/protoc-gen-connectrpc-permit main.go

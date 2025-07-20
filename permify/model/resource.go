@@ -2,38 +2,43 @@ package model
 
 import (
 	"fmt"
-	permitv1 "github.com/nrf110/connectrpc-permit/gen/nrf110/permit/v1"
-	"github.com/nrf110/protoc-gen-connectrpc-permit/permit/util"
+	"strings"
+
+	permifyv1 "github.com/nrf110/connectrpc-permify/gen/nrf110/permify/v1"
+	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/util"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"strings"
 )
 
 type Resource struct {
-	GoName       string
-	Type         string
-	Path         *Path
-	IdPath       *Path
-	TenantIdPath *Path
+	file           *protogen.GeneratedFile
+	GoName         string
+	Type           string
+	Path           *Path
+	IdPath         *Path
+	TenantIdPath   *Path
+	AttributePaths map[string]*Path
 }
 
-func NewResource(plugin *protogen.Plugin, pb *protogen.Message) *Resource {
+func NewResource(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *protogen.Message) *Resource {
 	util.Log.Println("finding resource")
-	return findResourcePath(plugin, pb, NewRootPathBuilder("req"))
+	return findResourcePath(plugin, file, pb, NewRootPathBuilder("req", file))
 }
 
-func findResourcePath(plugin *protogen.Plugin, pb *protogen.Message, path *PathBuilder) *Resource {
+func findResourcePath(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *protogen.Message, path *PathBuilder) *Resource {
 	options := pb.Desc.Options()
-	if proto.HasExtension(options, permitv1.E_ResourceType) {
+	if proto.HasExtension(options, permifyv1.E_ResourceType) {
 		util.Log.Println("found resource type in", pb.GoIdent.String())
-		resourceType := proto.GetExtension(options, permitv1.E_ResourceType).(string)
+		resourceType := proto.GetExtension(options, permifyv1.E_ResourceType).(string)
 		return &Resource{
-			GoName:       pb.GoIdent.GoName,
-			Type:         resourceType,
-			Path:         path.Build(),
-			IdPath:       findIdPath(plugin, pb, NewRootPathBuilder("resource")),
-			TenantIdPath: findTenantPath(pb, NewRootPathBuilder("resource")),
+			file:           file,
+			GoName:         pb.GoIdent.GoName,
+			Type:           resourceType,
+			Path:           path.Build(),
+			IdPath:         findIdPath(plugin, pb, NewRootPathBuilder("resource", file)),
+			TenantIdPath:   findTenantPath(pb, NewRootPathBuilder("resource", file)),
+			AttributePaths: findAttributes(plugin, pb, NewRootPathBuilder("resource", file), make(map[string]*Path)),
 		}
 	}
 
@@ -42,7 +47,7 @@ func findResourcePath(plugin *protogen.Plugin, pb *protogen.Message, path *PathB
 		if !field.Desc.HasOptionalKeyword() {
 			if util.IsMessageValueMap(field) {
 				util.Log.Println(field.GoName, "is a map of messages")
-				result := findResourcePath(plugin, util.GetMapFieldValue(field), NewPathBuilder(path.AddField(field)))
+				result := findResourcePath(plugin, file, util.GetMapFieldValue(field), NewPathBuilder(path.AddField(field)))
 				if result != nil {
 					return result
 				}
@@ -52,12 +57,12 @@ func findResourcePath(plugin *protogen.Plugin, pb *protogen.Message, path *PathB
 				util.Log.Println(field.GoName, "is a message")
 				if field.Desc.IsList() {
 					util.Log.Println(field.GoName, "is a repeated message")
-					if result := findResourcePath(plugin, field.Message, NewPathBuilder(path.AddField(field))); result != nil {
+					if result := findResourcePath(plugin, file, field.Message, NewPathBuilder(path.AddField(field))); result != nil {
 						return result
 					}
 				}
 
-				if result := findResourcePath(plugin, field.Message, path.AddField(field)); result != nil {
+				if result := findResourcePath(plugin, file, field.Message, path.AddField(field)); result != nil {
 					return result
 				}
 			}
@@ -69,7 +74,7 @@ func findResourcePath(plugin *protogen.Plugin, pb *protogen.Message, path *PathB
 
 func findIdPath(plugin *protogen.Plugin, pb *protogen.Message, path *PathBuilder) *Path {
 	for _, field := range pb.Fields {
-		if util.GetBoolExtension(field.Desc, permitv1.E_ResourceId) {
+		if util.GetBoolExtension(field.Desc, permifyv1.E_ResourceId) {
 			if field.Desc.IsList() {
 				if !util.IsIdField(field) {
 					plugin.Error(fmt.Errorf("%s must be a string, enum, or integer type or a list or map of those types", field.GoName))
@@ -108,13 +113,36 @@ func findIdPath(plugin *protogen.Plugin, pb *protogen.Message, path *PathBuilder
 	return nil
 }
 
+func findAttributes(plugin *protogen.Plugin, pb *protogen.Message, path *PathBuilder, accum map[string]*Path) map[string]*Path {
+	for _, field := range pb.Fields {
+		if found, attributeName := util.GetStringExtension(field.Desc, permifyv1.E_AttributeName); found {
+			accum[attributeName] = path.AddField(field).Build()
+			continue
+		}
+
+		if util.IsMessageValueMap(field) {
+			findAttributes(plugin, util.GetMapFieldValue(field), NewPathBuilder(path.AddField(field)), accum)
+			continue
+		}
+
+		if util.IsMessage(field) {
+			if field.Desc.IsList() {
+				findAttributes(plugin, field.Message, NewPathBuilder(path.AddField(field)), accum)
+			} else {
+				findAttributes(plugin, field.Message, path.AddField(field), accum)
+			}
+		}
+	}
+	return accum
+}
+
 func findTenantPath(pb *protogen.Message, path *PathBuilder) *Path {
 	for _, field := range pb.Fields {
 		if field.Desc.IsList() || field.Desc.IsMap() {
 			continue
 		}
 
-		if util.GetBoolExtension(field.Desc, permitv1.E_TenantId) {
+		if util.GetBoolExtension(field.Desc, permifyv1.E_TenantId) {
 			return path.AddField(field).Build()
 		}
 
@@ -127,34 +155,37 @@ func findTenantPath(pb *protogen.Message, path *PathBuilder) *Path {
 	return nil
 }
 
-func (resource *Resource) Generate(file *protogen.GeneratedFile, nestingLevel int) {
-	resource.checksFromResources(file, resource.Path, nestingLevel, make(map[string]bool))
+func (resource *Resource) Generate(nestingLevel int) {
+	resource.checksFromResources(resource.Path, nestingLevel, make(map[string]bool))
 }
 
-func (resource *Resource) checksFromResources(file *protogen.GeneratedFile, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+	file := resource.file
 	if remainingPath.Child != nil {
 		if remainingPath.Child.Child != nil || resource.IdPath != nil || resource.TenantIdPath != nil {
 			varName := loopVar(usedLoopVars)
 			file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, " {")
-			resource.checksFromResources(file, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+			resource.checksFromResources(remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
 		} else {
 			file.P(util.Indent(nestingLevel), "for range ", remainingPath.Path, " {")
-			resource.checksFromResources(file, remainingPath.Child, nestingLevel+1, usedLoopVars)
+			resource.checksFromResources(remainingPath.Child, nestingLevel+1, usedLoopVars)
 		}
 		file.P(util.Indent(nestingLevel), "}")
 	} else {
 		if resource.IdPath != nil {
 			file.P(util.Indent(nestingLevel), "resource := ", remainingPath.Path)
 		}
-		resource.checksFromIds(file, resource.IdPath, nestingLevel, usedLoopVars)
+		resource.checksFromIds(resource.IdPath, nestingLevel, usedLoopVars)
 	}
 }
 
-func (resource *Resource) checksFromIds(file *protogen.GeneratedFile, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) checksFromIds(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+	file := resource.file
+
 	if remainingPath != nil && remainingPath.Child != nil {
 		varName := loopVar(usedLoopVars)
 		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
-		resource.checksFromIds(file, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+		resource.checksFromIds(remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
 		file.P(util.Indent(nestingLevel), "}")
 	} else {
 		file.P(util.Indent(nestingLevel), `tenantId := "default"`)
@@ -164,14 +195,24 @@ func (resource *Resource) checksFromIds(file *protogen.GeneratedFile, remainingP
 			file.P(util.Indent(nestingLevel+1), "tenantId = ", resource.tenantIdPath())
 			file.P(util.Indent(nestingLevel), "}")
 		}
-		file.P(util.Indent(nestingLevel), "check := connectrpc_permit.Check {")
-		file.P(util.Indent(nestingLevel+1), "Action:   action,")
-		file.P(util.Indent(nestingLevel+1), "Resource: connectrpc_permit.Resource {")
-		file.P(util.Indent(nestingLevel+2), `Type:   "`, resource.Type, `",`)
-		if remainingPath != nil {
-			file.P(util.Indent(nestingLevel+2), "Key:    ", remainingPath.Path, ",")
+		if resource.AttributePaths != nil {
+			file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
+			for name, path := range resource.AttributePaths {
+
+				resource.checkAttributes(name, path, nestingLevel, usedLoopVars)
+			}
 		}
-		file.P(util.Indent(nestingLevel+2), "Tenant: tenantId,")
+		file.P(util.Indent(nestingLevel), "check := connectpermify.Check {")
+		file.P(util.Indent(nestingLevel+1), "Action:   action,")
+		file.P(util.Indent(nestingLevel+1), "Resource: connectpermify.Resource {")
+		file.P(util.Indent(nestingLevel+2), `Type:       "`, resource.Type, `",`)
+		if remainingPath != nil {
+			file.P(util.Indent(nestingLevel+2), "Key:        ", remainingPath.Path, ",")
+		}
+		file.P(util.Indent(nestingLevel+2), "Tenant:     tenantId,")
+		if resource.AttributePaths != nil {
+			file.P(util.Indent(nestingLevel+2), "Attributes: attributes,")
+		}
 		file.P(util.Indent(nestingLevel+1), "},")
 		file.P(util.Indent(nestingLevel), "}")
 		file.P(util.Indent(nestingLevel), "checks = append(checks, check)")
@@ -194,6 +235,17 @@ func (resource *Resource) checkTenantId(sb *strings.Builder, remainingPath *Path
 		sb.WriteString(` != ""`)
 	}
 	return sb.String()
+}
+
+func (resource *Resource) checkAttributes(name string, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+	file := resource.file
+
+	if remainingPath.Child != nil {
+		varName := loopVar(usedLoopVars)
+		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
+		resource.checkAttributes(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+		file.P(util.Indent(nestingLevel), "}")
+	}
 }
 
 func (resource *Resource) tenantIdPath() string {

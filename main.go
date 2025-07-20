@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/nrf110/protoc-gen-connectrpc-permit/permit/model"
-	"github.com/nrf110/protoc-gen-connectrpc-permit/permit/util"
+	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/model"
+	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/util"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -33,7 +33,7 @@ func buildModel(plugin *protogen.Plugin, file *protogen.File) {
 	gen.P("")
 
 	for _, service := range file.Services {
-		svc := model.NewService(plugin, service)
-		svc.Generate(gen)
+		svc := model.NewService(plugin, gen, service)
+		svc.Generate()
 	}
 }
