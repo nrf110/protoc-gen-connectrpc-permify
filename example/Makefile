@@ -1,7 +1,6 @@
 .PHONY: clean
 clean:
-	rm -rf ./bin
-	rm -rf example/internal/gen
+	rm -rf internal/gen
 
 .PHONY: update
 update:
@@ -16,3 +15,4 @@ build: gen update
 .PHONY: gen
 gen: clean update
 	buf generate
+	go mod tidy
