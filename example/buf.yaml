@@ -7,4 +7,4 @@ breaking:
   use:
     - FILE
 deps:
-  - buf.build/nrf110/connectrpc-permit
+  - buf.build/nrf110/connectrpc-permify

@@ -2,17 +2,17 @@ syntax = "proto3";
 
 package example.v1;
 
-option go_package = "github.com/example/example-service/internal/gen/proto/example/v1;examplev1";
-
 import "nrf110/permify/v1/permify.proto";
 import "proto/example/v1/common.proto";
 
+option go_package = "github.com/example/example-service/internal/gen/proto/example/v1;examplev1";
+
 message NestedAttribute {
-  string foo = 1 [(nrf110.permit.v1.attribute_name) = "foo"];
+  string foo = 1 [(nrf110.permify.v1.attribute_name) = "foo"];
 }
 
 message MappedAttribute {
-  string bar = 1 [(nrf110.permit.v1.attribute_name) = "foo"];
+  string bar = 1 [(nrf110.permify.v1.attribute_name) = "foo"];
 }
 
 message ComplexAttribute {
@@ -21,18 +21,17 @@ message ComplexAttribute {
 }
 
 message AttributesRequest {
-  option (nrf110.permit.v1.resource_type) = "Attributes";
+  option (nrf110.permify.v1.resource_type) = "Attributes";
 
-  repeated ComplexAttribute complex = 1 [(nrf110.permit.v1.attribute_name) = "complex"];
+  repeated ComplexAttribute complex = 1 [(nrf110.permify.v1.attribute_name) = "complex"];
   repeated NestedAttribute nested = 2;
   map<string, MappedAttribute> mapped = 3;
-  string id = 4 [(nrf110.permit.v1.resource_id) = true];
-  string company_id = 5 [(nrf110.permit.v1.tenant_id) = true];
+  string id = 4 [(nrf110.permify.v1.resource_id) = true];
+  string company_id = 5 [(nrf110.permify.v1.tenant_id) = true];
 }
 
 service Attributes {
   rpc WithAttributes(AttributesRequest) returns (Response) {
-    option (nrf110.permit.v1.action) = "read";
-    option (nrf110.permit.v1.bulk_check_mode) = any_of;
+    option (nrf110.permify.v1.permission) = "read";
   }
 }

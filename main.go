@@ -25,8 +25,8 @@ func buildModel(plugin *protogen.Plugin, file *protogen.File) {
 	filename := file.GeneratedFilenamePrefix + "_permit.pb.go"
 	gen := plugin.NewGeneratedFile(filename, file.GoImportPath)
 	gen.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "permitv1",
-		GoImportPath: "github.com/nrf110/connectrpc-permit",
+		GoName:       "permifyv1",
+		GoImportPath: "github.com/nrf110/connectrpc-permify/pkg",
 	})
 
 	gen.P("package " + file.GoPackageName)

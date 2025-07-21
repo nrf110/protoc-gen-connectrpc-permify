@@ -195,24 +195,23 @@ func (resource *Resource) checksFromIds(remainingPath *Path, nestingLevel int, u
 			file.P(util.Indent(nestingLevel+1), "tenantId = ", resource.tenantIdPath())
 			file.P(util.Indent(nestingLevel), "}")
 		}
-		if resource.AttributePaths != nil {
-			file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
-			for name, path := range resource.AttributePaths {
-
-				resource.checkAttributes(name, path, nestingLevel, usedLoopVars)
-			}
-		}
-		file.P(util.Indent(nestingLevel), "check := connectpermify.Check {")
-		file.P(util.Indent(nestingLevel+1), "Action:   action,")
-		file.P(util.Indent(nestingLevel+1), "Resource: connectpermify.Resource {")
+		// if resource.AttributePaths != nil {
+		// 	file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
+		// 	for name, path := range resource.AttributePaths {
+		// 		resource.checkAttributes(name, path, nestingLevel, usedLoopVars)
+		// 	}
+		// }
+		file.P(util.Indent(nestingLevel), "check := pkg.Check {")
+		file.P(util.Indent(nestingLevel+1), "TenantID:     tenantId,")
+		file.P(util.Indent(nestingLevel+1), "Permission:   permission,")
+		file.P(util.Indent(nestingLevel+1), "Entity: &pkg.Resource {")
 		file.P(util.Indent(nestingLevel+2), `Type:       "`, resource.Type, `",`)
 		if remainingPath != nil {
-			file.P(util.Indent(nestingLevel+2), "Key:        ", remainingPath.Path, ",")
+			file.P(util.Indent(nestingLevel+2), "ID:        ", remainingPath.Path, ",")
 		}
-		file.P(util.Indent(nestingLevel+2), "Tenant:     tenantId,")
-		if resource.AttributePaths != nil {
-			file.P(util.Indent(nestingLevel+2), "Attributes: attributes,")
-		}
+		// if resource.AttributePaths != nil {
+		// 	file.P(util.Indent(nestingLevel+2), "Attributes: attributes,")
+		// }
 		file.P(util.Indent(nestingLevel+1), "},")
 		file.P(util.Indent(nestingLevel), "}")
 		file.P(util.Indent(nestingLevel), "checks = append(checks, check)")
@@ -264,7 +263,7 @@ func (resource *Resource) tenantIdPath() string {
 func loopVar(inUse map[string]bool) string {
 	for {
 		name := util.VariableName()
-		if exists, _ := inUse[name]; !exists {
+		if exists := inUse[name]; !exists {
 			inUse[name] = true
 			return name
 		}

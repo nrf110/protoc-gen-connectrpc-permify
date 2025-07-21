@@ -2,39 +2,39 @@ syntax = "proto3";
 
 package example.v1;
 
-option go_package = "github.com/example/example-service/internal/gen/proto/example/v1;examplev1";
-
-import "nrf110/permit/v1/permit.proto";
+import "nrf110/permify/v1/permify.proto";
 import "proto/example/v1/common.proto";
+
+option go_package = "github.com/example/example-service/internal/gen/proto/example/v1;examplev1";
 
 message NestedResourceRequest {
   NestedResource resource = 1;
 }
 
 message ResourceRequest {
-  option (nrf110.permit.v1.resource_type) = "Flat";
+  option (nrf110.permify.v1.resource_type) = "Flat";
 
   string name = 1;
 }
 
 message ResourceWithIdRequest {
-  option (nrf110.permit.v1.resource_type) = "Flat";
+  option (nrf110.permify.v1.resource_type) = "Flat";
 
   string name = 1;
-  string id = 2 [(nrf110.permit.v1.resource_id) = true];
-  string company_id = 3 [(nrf110.permit.v1.tenant_id) = true];
+  string id = 2 [(nrf110.permify.v1.resource_id) = true];
+  string company_id = 3 [(nrf110.permify.v1.tenant_id) = true];
 }
 
 service Single {
   rpc Flat(ResourceRequest) returns (Response) {
-    option (nrf110.permit.v1.action) = "create";
+    option (nrf110.permify.v1.permission) = "create";
   }
 
   rpc FlatWithId(ResourceWithIdRequest) returns (Response) {
-    option (nrf110.permit.v1.action) = "read";
+    option (nrf110.permify.v1.permission) = "read";
   }
 
   rpc Nested(NestedResourceRequest) returns (Response) {
-    option (nrf110.permit.v1.action) = "edit";
+    option (nrf110.permify.v1.permission) = "edit";
   }
 }

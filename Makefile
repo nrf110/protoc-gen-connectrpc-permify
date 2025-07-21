@@ -12,4 +12,4 @@ test: clean update
 
 build: clean update
 	mkdir -p ./bin
-	go build -o ./bin/protoc-gen-connectrpc-permit main.go
+	go build -o ./bin/protoc-gen-connectrpc-permify main.go
