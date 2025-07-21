@@ -1,0 +1,11 @@
+version: v2
+plugins:
+  - local: protoc-gen-go
+    out: output
+    opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: output
+    opt: paths=source_relative
+  - local: ../bin/protoc-gen-connectrpc-permify
+    out: output
+    opt: paths=source_relative

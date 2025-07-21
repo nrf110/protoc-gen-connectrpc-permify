@@ -1,0 +1,10 @@
+version: v2
+name: github.com/example/example-service
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE
+deps:
+  - buf.build/nrf110/connectrpc-permify
