@@ -15,7 +15,7 @@ func TestMethodStruct(t *testing.T) {
 		Type:   "User",
 		GoName: "UserRequest",
 	}
-	
+
 	method := &Method{
 		file:        mockFile,
 		IsPublic:    false,
@@ -24,7 +24,7 @@ func TestMethodStruct(t *testing.T) {
 		Resource:    mockResource,
 		CheckType:   connectpermify.SINGLE,
 	}
-	
+
 	// Verify all fields are set correctly
 	assert.Equal(t, mockFile, method.file)
 	assert.False(t, method.IsPublic)
@@ -37,7 +37,7 @@ func TestMethodStruct(t *testing.T) {
 func TestMethodPublicMethod(t *testing.T) {
 	// Test creation of a public method
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	publicMethod := &Method{
 		file:        mockFile,
 		IsPublic:    true,
@@ -46,7 +46,7 @@ func TestMethodPublicMethod(t *testing.T) {
 		Resource:    nil, // Public methods don't need resources
 		CheckType:   connectpermify.PUBLIC,
 	}
-	
+
 	assert.True(t, publicMethod.IsPublic)
 	assert.Empty(t, publicMethod.Permission)
 	assert.Nil(t, publicMethod.Resource)
@@ -60,7 +60,7 @@ func TestMethodProtectedMethod(t *testing.T) {
 		Type:   "Document",
 		GoName: "DocumentRequest",
 	}
-	
+
 	protectedMethod := &Method{
 		file:        mockFile,
 		IsPublic:    false,
@@ -69,7 +69,7 @@ func TestMethodProtectedMethod(t *testing.T) {
 		Resource:    mockResource,
 		CheckType:   connectpermify.SINGLE,
 	}
-	
+
 	assert.False(t, protectedMethod.IsPublic)
 	assert.Equal(t, "write", protectedMethod.Permission)
 	assert.NotNil(t, protectedMethod.Resource)
@@ -80,12 +80,12 @@ func TestMethodProtectedMethod(t *testing.T) {
 func TestMethodGenerate(t *testing.T) {
 	// Test the Generate method structure - we focus on testing the logic paths
 	// without actually calling the generate functions that require complex mocks
-	
+
 	tests := []struct {
-		name           string
-		method         *Method
-		shouldCallGen  bool
-		description    string
+		name          string
+		method        *Method
+		shouldCallGen bool
+		description   string
 	}{
 		{
 			name: "public method logic",
@@ -132,7 +132,7 @@ func TestMethodGeneratePublic(t *testing.T) {
 		IsPublic:    true,
 		RequestType: "PublicRequest",
 	}
-	
+
 	// Verify public method characteristics
 	assert.True(t, method.IsPublic, "Method should be public")
 	assert.Equal(t, "PublicRequest", method.RequestType, "Should have correct request type")
@@ -211,10 +211,10 @@ func TestMethodValidation(t *testing.T) {
 			description: "Non-public methods must have permission",
 		},
 		{
-			name:       "invalid - no resource for protected method",
-			isPublic:   false,
-			permission: "write",
-			resource:   nil,
+			name:        "invalid - no resource for protected method",
+			isPublic:    false,
+			permission:  "write",
+			resource:    nil,
 			expectValid: false,
 			description: "Non-public methods must have a resource",
 		},
@@ -227,7 +227,7 @@ func TestMethodValidation(t *testing.T) {
 				Permission: tt.permission,
 				Resource:   tt.resource,
 			}
-			
+
 			// Test the logical validation using the method fields
 			isValid := method.IsPublic || (method.Permission != "" && method.Resource != nil)
 			assert.Equal(t, tt.expectValid, isValid, tt.description)
@@ -239,10 +239,10 @@ func TestMethodPermissionTypes(t *testing.T) {
 	// Test different permission types
 	mockFile := &protogen.GeneratedFile{}
 	mockResource := &Resource{Type: "Document"}
-	
+
 	permissions := []string{
 		"read",
-		"write", 
+		"write",
 		"delete",
 		"admin",
 		"manage",
@@ -250,7 +250,7 @@ func TestMethodPermissionTypes(t *testing.T) {
 		"edit",
 		"custom-permission",
 	}
-	
+
 	for _, perm := range permissions {
 		t.Run("permission_"+perm, func(t *testing.T) {
 			method := &Method{
@@ -260,7 +260,7 @@ func TestMethodPermissionTypes(t *testing.T) {
 				RequestType: "TestRequest",
 				Resource:    mockResource,
 			}
-			
+
 			assert.Equal(t, perm, method.Permission)
 			assert.False(t, method.IsPublic)
 			assert.NotNil(t, method.Resource)
@@ -271,7 +271,7 @@ func TestMethodPermissionTypes(t *testing.T) {
 func TestMethodRequestTypes(t *testing.T) {
 	// Test different request types
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	requestTypes := []string{
 		"UserRequest",
 		"DocumentRequest",
@@ -279,7 +279,7 @@ func TestMethodRequestTypes(t *testing.T) {
 		"ProjectRequest",
 		"CustomRequest",
 	}
-	
+
 	for _, reqType := range requestTypes {
 		t.Run("request_type_"+reqType, func(t *testing.T) {
 			method := &Method{
@@ -287,7 +287,7 @@ func TestMethodRequestTypes(t *testing.T) {
 				IsPublic:    true, // Public to avoid needing resource
 				RequestType: reqType,
 			}
-			
+
 			assert.Equal(t, reqType, method.RequestType)
 		})
 	}
@@ -296,14 +296,14 @@ func TestMethodRequestTypes(t *testing.T) {
 func TestMethodResourceAssociation(t *testing.T) {
 	// Test method association with different resource types
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	resources := []*Resource{
 		{Type: "User", GoName: "UserResource"},
 		{Type: "Document", GoName: "DocumentResource"},
 		{Type: "Organization", GoName: "OrgResource"},
 		{Type: "Project", GoName: "ProjectResource"},
 	}
-	
+
 	for _, resource := range resources {
 		t.Run("resource_"+resource.Type, func(t *testing.T) {
 			method := &Method{
@@ -312,7 +312,7 @@ func TestMethodResourceAssociation(t *testing.T) {
 				Permission: "read",
 				Resource:   resource,
 			}
-			
+
 			assert.Equal(t, resource, method.Resource)
 			assert.Equal(t, resource.Type, method.Resource.Type)
 			assert.Equal(t, resource.GoName, method.Resource.GoName)
@@ -323,7 +323,7 @@ func TestMethodResourceAssociation(t *testing.T) {
 func TestMethodCheckTypeHandling(t *testing.T) {
 	// Test different CheckType values
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	tests := []struct {
 		name      string
 		isPublic  bool
@@ -340,7 +340,7 @@ func TestMethodCheckTypeHandling(t *testing.T) {
 			checkType: connectpermify.SINGLE,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			method := &Method{
@@ -348,7 +348,7 @@ func TestMethodCheckTypeHandling(t *testing.T) {
 				IsPublic:  tt.isPublic,
 				CheckType: tt.checkType,
 			}
-			
+
 			assert.Equal(t, tt.checkType, method.CheckType)
 			assert.Equal(t, tt.isPublic, method.IsPublic)
 		})
@@ -384,14 +384,14 @@ func TestMethodCodeGenerationStructure(t *testing.T) {
 			description:     "Protected methods should generate GetChecks with SINGLE type",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// We can't easily test the actual generated code without complex mocks
 			// But we can verify the method has the expected structure
 			assert.NotEmpty(t, tt.method.RequestType)
 			assert.Contains(t, tt.expectedPattern, "GetChecks")
-			
+
 			if tt.method.IsPublic {
 				assert.Empty(t, tt.method.Permission)
 			} else {

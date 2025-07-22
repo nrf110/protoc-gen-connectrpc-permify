@@ -11,21 +11,21 @@ import (
 
 // ProtoBuilder helps build proto definitions for testing
 type ProtoBuilder struct {
-	syntax   string
-	pkg      string
+	syntax    string
+	pkg       string
 	goPackage string
-	imports  []string
-	messages []string
-	services []string
+	imports   []string
+	messages  []string
+	services  []string
 }
 
 // NewProtoBuilder creates a new proto builder
 func NewProtoBuilder() *ProtoBuilder {
 	return &ProtoBuilder{
-		syntax:   "proto3",
-		pkg:      "test.v1",
+		syntax:    "proto3",
+		pkg:       "test.v1",
 		goPackage: "test/v1;testv1",
-		imports:  []string{"nrf110/permify/v1/permify.proto"},
+		imports:   []string{"nrf110/permify/v1/permify.proto"},
 	}
 }
 
@@ -212,7 +212,7 @@ func MockProtogenFile(t *testing.T, name string, protoContent string) *protogen.
 	// This is a simplified mock for testing purposes
 	// In real usage you'd need proper protoreflect descriptors
 	// For now, we'll create a basic structure for testing
-	
+
 	// Note: Creating proper protogen.File requires complex protoreflect setup
 	// This is a placeholder that would need actual descriptor implementation
 	return nil // Placeholder - would need full implementation
@@ -227,7 +227,7 @@ func MockProtogenMessage(t *testing.T, name string, fields ...*protogen.Field) *
 	return nil
 }
 
-// MockProtogenField creates a mock protogen.Field  
+// MockProtogenField creates a mock protogen.Field
 func MockProtogenField(t *testing.T, name string, fieldType protoreflect.Kind) *protogen.Field {
 	t.Helper()
 

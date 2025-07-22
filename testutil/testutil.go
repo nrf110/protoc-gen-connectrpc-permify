@@ -80,7 +80,7 @@ func (env *TestPluginEnv) GetOutput() map[string]string {
 // This is a simplified version - in practice you might want to use buf or protoc
 func createFileDescriptor(t *testing.T, filename, content string) *descriptorpb.FileDescriptorProto {
 	t.Helper()
-	
+
 	// This is a basic implementation - for full proto parsing you'd need protoc
 	// For now, we'll create minimal descriptors manually
 	desc := &descriptorpb.FileDescriptorProto{
@@ -90,7 +90,7 @@ func createFileDescriptor(t *testing.T, filename, content string) *descriptorpb.
 			GoPackage: proto.String("test/v1;testv1"),
 		},
 	}
-	
+
 	return desc
 }
 
@@ -105,10 +105,10 @@ func CompareGoldenFile(t *testing.T, goldenPath string, actual string) {
 			dir := filepath.Dir(goldenPath)
 			err = os.MkdirAll(dir, 0755)
 			require.NoError(t, err)
-			
+
 			err = os.WriteFile(goldenPath, []byte(actual), 0644)
 			require.NoError(t, err)
-			
+
 			t.Logf("Created golden file: %s", goldenPath)
 			return
 		}
@@ -121,11 +121,11 @@ func CompareGoldenFile(t *testing.T, goldenPath string, actual string) {
 // UpdateGoldenFile updates a golden file with new content (useful for regenerating tests)
 func UpdateGoldenFile(t *testing.T, goldenPath string, content string) {
 	t.Helper()
-	
+
 	dir := filepath.Dir(goldenPath)
 	err := os.MkdirAll(dir, 0755)
 	require.NoError(t, err)
-	
+
 	err = os.WriteFile(goldenPath, []byte(content), 0644)
 	require.NoError(t, err)
 }
@@ -133,19 +133,19 @@ func UpdateGoldenFile(t *testing.T, goldenPath string, content string) {
 // LoadGoldenFile loads a golden file for reading
 func LoadGoldenFile(t *testing.T, goldenPath string) (string, error) {
 	t.Helper()
-	
+
 	content, err := os.ReadFile(goldenPath)
 	if err != nil {
 		return "", err
 	}
-	
+
 	return string(content), nil
 }
 
 // LoadProtoFiles loads proto files from a directory
 func LoadProtoFiles(t *testing.T, dir string) map[string]string {
 	t.Helper()
-	
+
 	files := make(map[string]string)
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -166,21 +166,21 @@ func LoadProtoFiles(t *testing.T, dir string) map[string]string {
 		return nil
 	})
 	require.NoError(t, err)
-	
+
 	return files
 }
 
 // AssertGoCodeCompiles checks that generated Go code compiles
 func AssertGoCodeCompiles(t *testing.T, code string) {
 	t.Helper()
-	
+
 	// Create temporary file
 	tmpDir := t.TempDir()
 	tmpFile := filepath.Join(tmpDir, "test.go")
-	
+
 	err := os.WriteFile(tmpFile, []byte(code), 0644)
 	require.NoError(t, err)
-	
+
 	// Try to parse as Go code (basic syntax check)
 	// For full compilation checking, you'd run `go build` on the file
 	// This is a simplified version
@@ -195,37 +195,37 @@ func AssertGoCodeCompiles(t *testing.T, code string) {
 // CreateTestProtoMessage creates a test proto message definition
 func CreateTestProtoMessage(name string, fields map[string]string, options map[string]string) string {
 	var buf bytes.Buffer
-	
+
 	buf.WriteString(fmt.Sprintf("message %s {\n", name))
-	
+
 	// Add options
 	for key, value := range options {
 		buf.WriteString(fmt.Sprintf("  option %s = %s;\n", key, value))
 	}
-	
+
 	buf.WriteString("\n")
-	
+
 	// Add fields
 	fieldNum := 1
 	for fieldName, fieldType := range fields {
 		buf.WriteString(fmt.Sprintf("  %s %s = %d;\n", fieldType, fieldName, fieldNum))
 		fieldNum++
 	}
-	
+
 	buf.WriteString("}\n")
-	
+
 	return buf.String()
 }
 
 // CreateTestProtoService creates a test proto service definition
 func CreateTestProtoService(name string, methods map[string][2]string, methodOptions map[string]map[string]string) string {
 	var buf bytes.Buffer
-	
+
 	buf.WriteString(fmt.Sprintf("service %s {\n", name))
-	
+
 	for methodName, reqResp := range methods {
 		buf.WriteString(fmt.Sprintf("  rpc %s(%s) returns (%s)", methodName, reqResp[0], reqResp[1]))
-		
+
 		if options, hasOptions := methodOptions[methodName]; hasOptions {
 			buf.WriteString(" {\n")
 			for key, value := range options {
@@ -235,8 +235,8 @@ func CreateTestProtoService(name string, methods map[string][2]string, methodOpt
 		}
 		buf.WriteString(";\n")
 	}
-	
+
 	buf.WriteString("}\n")
-	
+
 	return buf.String()
 }

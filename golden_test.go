@@ -46,11 +46,11 @@ func TestGoldenFiles(t *testing.T) {
 			content, err := testutil.LoadGoldenFile(t, goldenPath)
 			require.NoError(t, err, "Golden file should be readable")
 			assert.NotEmpty(t, content, "Golden file should have content")
-			
+
 			// Verify golden file contains expected patterns
 			assert.Contains(t, content, "GetChecks", "Generated code should contain GetChecks method")
 			assert.Contains(t, content, "pkg.CheckConfig", "Generated code should use CheckConfig type")
-			
+
 			t.Logf("Golden file test passed for %s", tt.description)
 		})
 	}
@@ -59,7 +59,7 @@ func TestGoldenFiles(t *testing.T) {
 func TestGoldenFileGeneration(t *testing.T) {
 	// Test actual code generation (simplified version)
 	// This demonstrates how we would test actual plugin output
-	
+
 	tests := []struct {
 		name           string
 		protoContent   string
@@ -131,16 +131,16 @@ func TestGoldenFileGeneration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Verify the proto content contains expected elements
 			assert.Contains(t, tt.protoContent, "syntax = \"proto3\"", "Proto should have proto3 syntax")
-			
+
 			if strings.Contains(tt.expectedOutput, "pkg.PUBLIC") {
 				assert.Contains(t, tt.protoContent, "public", "Public method proto should contain public annotation")
 			}
-			
+
 			if strings.Contains(tt.expectedOutput, "permission") {
 				assert.Contains(t, tt.protoContent, "permission", "Protected method proto should contain permission annotation")
 				assert.Contains(t, tt.protoContent, "resource_type", "Protected method proto should contain resource_type")
 			}
-			
+
 			t.Logf("Generated pattern test passed for %s", tt.description)
 		})
 	}
@@ -149,32 +149,32 @@ func TestGoldenFileGeneration(t *testing.T) {
 func TestGoldenFileStructure(t *testing.T) {
 	// Test the structure and patterns in golden files
 	goldenDir := "testdata/expected"
-	
+
 	// Get all golden files
 	goldenFiles, err := os.ReadDir(goldenDir)
 	require.NoError(t, err, "Should be able to read golden files directory")
-	
+
 	for _, file := range goldenFiles {
 		if !strings.HasSuffix(file.Name(), ".golden") {
 			continue
 		}
-		
+
 		t.Run(file.Name(), func(t *testing.T) {
 			goldenPath := filepath.Join(goldenDir, file.Name())
 			content, err := testutil.LoadGoldenFile(t, goldenPath)
 			require.NoError(t, err, "Should be able to load golden file")
-			
+
 			// Verify basic structure
 			assert.Contains(t, content, "package", "Golden file should have package declaration")
 			assert.Contains(t, content, "func", "Golden file should contain function definition")
 			assert.Contains(t, content, "GetChecks", "Golden file should contain GetChecks method")
 			assert.Contains(t, content, "pkg.CheckConfig", "Golden file should use CheckConfig")
-			
+
 			// Count braces to ensure balanced
 			openBraces := strings.Count(content, "{")
 			closeBraces := strings.Count(content, "}")
 			assert.Equal(t, openBraces, closeBraces, "Braces should be balanced in generated code")
-			
+
 			// Verify indentation (basic check)
 			lines := strings.Split(content, "\n")
 			for i, line := range lines {
@@ -183,7 +183,7 @@ func TestGoldenFileStructure(t *testing.T) {
 					if strings.HasPrefix(strings.TrimLeft(line, " "), "return") ||
 						strings.HasPrefix(strings.TrimLeft(line, " "), "Type:") ||
 						strings.HasPrefix(strings.TrimLeft(line, " "), "Checks:") {
-						assert.True(t, strings.HasPrefix(line, "    "), 
+						assert.True(t, strings.HasPrefix(line, "    "),
 							"Line %d should be properly indented: %s", i+1, line)
 					}
 				}
@@ -206,12 +206,12 @@ func (req *TestRequest) GetChecks() pkg.CheckConfig {
 
 	// Update the golden file
 	testutil.UpdateGoldenFile(t, testGoldenPath, testContent)
-	
+
 	// Verify it was written correctly
 	loadedContent, err := testutil.LoadGoldenFile(t, testGoldenPath)
 	require.NoError(t, err)
 	assert.Equal(t, testContent, loadedContent)
-	
+
 	// Clean up
 	err = os.Remove(testGoldenPath)
 	require.NoError(t, err)
@@ -220,10 +220,10 @@ func (req *TestRequest) GetChecks() pkg.CheckConfig {
 func TestGoldenFileValidation(t *testing.T) {
 	// Test validation of golden file content
 	tests := []struct {
-		name         string
-		content      string
+		name          string
+		content       string
 		shouldBeValid bool
-		description  string
+		description   string
 	}{
 		{
 			name: "valid_public_method",
@@ -295,33 +295,33 @@ func validateGoldenContent(content string) bool {
 	if !strings.Contains(content, "package") {
 		return false
 	}
-	
+
 	if !strings.Contains(content, "func") {
 		return false
 	}
-	
+
 	if !strings.Contains(content, "GetChecks") {
 		return false
 	}
-	
+
 	if !strings.Contains(content, "pkg.CheckConfig") {
 		return false
 	}
-	
+
 	// Check balanced braces
 	openBraces := strings.Count(content, "{")
 	closeBraces := strings.Count(content, "}")
 	if openBraces != closeBraces {
 		return false
 	}
-	
+
 	// Check balanced parentheses
 	openParens := strings.Count(content, "(")
 	closeParens := strings.Count(content, ")")
 	if openParens != closeParens {
 		return false
 	}
-	
+
 	return true
 }
 
@@ -357,13 +357,13 @@ func TestGoldenFilePatternsDetection(t *testing.T) {
 			// Test that we can identify these patterns
 			for _, pattern := range expectedPatterns {
 				assert.NotEmpty(t, pattern, "Pattern should not be empty")
-				
+
 				// For demonstration, test with sample content
 				sampleContent := fmt.Sprintf(`package test
 func example() {
     %s
 }`, pattern)
-				
+
 				assert.Contains(t, sampleContent, pattern, "Sample should contain the pattern")
 			}
 		})

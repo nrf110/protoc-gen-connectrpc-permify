@@ -12,23 +12,23 @@ import (
 func TestPluginBasicExecution(t *testing.T) {
 	// Create a simple proto file for testing
 	builder := testutil.NewProtoBuilder()
-	
+
 	// Build message first
 	builder.NewMessage("TestRequest").
 		WithResourceType("Test").
 		AddResourceIdField("string", "id", 1).
 		Build(builder)
-		
+
 	// Add a basic response message
 	builder.NewMessage("TestResponse").
 		AddField("string", "status", 1).
 		Build(builder)
-	
+
 	// Build service
 	builder.NewService("TestService").
 		AddPermissionMethod("GetTest", "TestRequest", "TestResponse", "read").
 		Build(builder)
-	
+
 	protoContent := builder.Build()
 
 	// Create test environment
@@ -45,7 +45,7 @@ func TestPluginBasicExecution(t *testing.T) {
 
 	// Basic smoke test - ensure the proto content contains expected elements
 	assert.Contains(t, protoContent, "message TestRequest")
-	assert.Contains(t, protoContent, "service TestService") 
+	assert.Contains(t, protoContent, "service TestService")
 	assert.Contains(t, protoContent, "resource_type")
 	assert.Contains(t, protoContent, "permission")
 }
@@ -54,13 +54,13 @@ func TestProtoBuilder(t *testing.T) {
 	// Test the proto builder utility
 	builder := testutil.NewProtoBuilder().
 		WithPackage("example.v1")
-		
+
 	builder.NewMessage("User").
 		WithResourceType("User").
 		AddResourceIdField("string", "id", 1).
 		AddField("string", "name", 2).
 		Build(builder)
-		
+
 	proto := builder.Build()
 
 	// Verify the generated proto content

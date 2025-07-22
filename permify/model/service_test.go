@@ -11,7 +11,7 @@ import (
 func TestServiceStruct(t *testing.T) {
 	// Test the Service struct creation and field access
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	methods := []*Method{
 		{
 			IsPublic:    true,
@@ -23,12 +23,12 @@ func TestServiceStruct(t *testing.T) {
 			RequestType: "UserRequest",
 		},
 	}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: methods,
 	}
-	
+
 	// Verify all fields are set correctly
 	assert.Equal(t, mockFile, service.file)
 	assert.Len(t, service.Methods, 2)
@@ -39,12 +39,12 @@ func TestServiceStruct(t *testing.T) {
 func TestServiceWithNoMethods(t *testing.T) {
 	// Test service with no methods
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: []*Method{},
 	}
-	
+
 	assert.Equal(t, mockFile, service.file)
 	assert.Len(t, service.Methods, 0)
 	assert.Empty(t, service.Methods)
@@ -53,18 +53,18 @@ func TestServiceWithNoMethods(t *testing.T) {
 func TestServiceWithSingleMethod(t *testing.T) {
 	// Test service with a single method
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	method := &Method{
 		IsPublic:    true,
 		RequestType: "SingleRequest",
 		CheckType:   connectpermify.PUBLIC,
 	}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: []*Method{method},
 	}
-	
+
 	assert.Equal(t, mockFile, service.file)
 	assert.Len(t, service.Methods, 1)
 	assert.Equal(t, method, service.Methods[0])
@@ -75,7 +75,7 @@ func TestServiceWithSingleMethod(t *testing.T) {
 func TestServiceWithMultipleMethods(t *testing.T) {
 	// Test service with multiple methods of different types
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	methods := []*Method{
 		{
 			IsPublic:    true,
@@ -104,16 +104,16 @@ func TestServiceWithMultipleMethods(t *testing.T) {
 			CheckType:   connectpermify.SINGLE,
 		},
 	}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: methods,
 	}
-	
+
 	// Verify service structure
 	assert.Equal(t, mockFile, service.file)
 	assert.Len(t, service.Methods, 4)
-	
+
 	// Verify each method
 	for i, expectedMethod := range methods {
 		assert.Equal(t, expectedMethod, service.Methods[i])
@@ -127,7 +127,7 @@ func TestServiceWithMultipleMethods(t *testing.T) {
 func TestServiceGenerate(t *testing.T) {
 	// Test the Generate method - we focus on testing the logic
 	// without actually calling the generate functions that require complex mocks
-	
+
 	tests := []struct {
 		name        string
 		service     *Service
@@ -175,11 +175,11 @@ func TestServiceGenerate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test the service structure instead of actual generation
 			assert.NotNil(t, tt.service.Methods, "Methods slice should not be nil")
-			
+
 			// Count public vs protected methods
 			publicCount := 0
 			protectedCount := 0
-			
+
 			for _, method := range tt.service.Methods {
 				if method.IsPublic {
 					publicCount++
@@ -187,14 +187,14 @@ func TestServiceGenerate(t *testing.T) {
 					protectedCount++
 				}
 			}
-			
+
 			totalMethods := publicCount + protectedCount
 			assert.Equal(t, len(tt.service.Methods), totalMethods, "Method count should match")
-			
+
 			// Verify method characteristics
 			for _, method := range tt.service.Methods {
 				assert.NotEmpty(t, method.RequestType, "Each method should have a request type")
-				
+
 				if method.IsPublic {
 					assert.Empty(t, method.Permission, "Public methods should not have permissions")
 				} else {
@@ -208,14 +208,14 @@ func TestServiceGenerate(t *testing.T) {
 func TestServiceMethodTypes(t *testing.T) {
 	// Test service with different combinations of method types
 	tests := []struct {
-		name           string
-		methods        []*Method
-		expectedPublic int
+		name            string
+		methods         []*Method
+		expectedPublic  int
 		expectedPrivate int
-		description    string
+		description     string
 	}{
 		{
-			name:           "all public methods",
+			name: "all public methods",
 			methods: []*Method{
 				{IsPublic: true, RequestType: "Public1"},
 				{IsPublic: true, RequestType: "Public2"},
@@ -257,11 +257,11 @@ func TestServiceMethodTypes(t *testing.T) {
 				file:    mockFile,
 				Methods: tt.methods,
 			}
-			
+
 			// Count actual method types
 			publicCount := 0
 			privateCount := 0
-			
+
 			for _, method := range service.Methods {
 				if method.IsPublic {
 					publicCount++
@@ -269,7 +269,7 @@ func TestServiceMethodTypes(t *testing.T) {
 					privateCount++
 				}
 			}
-			
+
 			assert.Equal(t, tt.expectedPublic, publicCount, "Public method count should match")
 			assert.Equal(t, tt.expectedPrivate, privateCount, "Protected method count should match")
 			assert.Equal(t, len(tt.methods), len(service.Methods), "Total method count should match")
@@ -280,10 +280,10 @@ func TestServiceMethodTypes(t *testing.T) {
 func TestServicePermissionVariety(t *testing.T) {
 	// Test service with methods having various permissions
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	permissions := []string{"read", "write", "delete", "admin", "manage", "view", "custom-permission"}
 	var methods []*Method
-	
+
 	// Create a method for each permission
 	for _, perm := range permissions {
 		method := &Method{
@@ -294,14 +294,14 @@ func TestServicePermissionVariety(t *testing.T) {
 		}
 		methods = append(methods, method)
 	}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: methods,
 	}
-	
+
 	assert.Len(t, service.Methods, len(permissions))
-	
+
 	// Verify each permission is correctly set
 	for i, expectedPerm := range permissions {
 		assert.Equal(t, expectedPerm, service.Methods[i].Permission)
@@ -313,14 +313,14 @@ func TestServicePermissionVariety(t *testing.T) {
 func TestServiceResourceAssociations(t *testing.T) {
 	// Test service methods with different resource associations
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	resources := []*Resource{
 		{Type: "User", GoName: "UserResource"},
 		{Type: "Document", GoName: "DocumentResource"},
 		{Type: "Organization", GoName: "OrgResource"},
 		{Type: "Project", GoName: "ProjectResource"},
 	}
-	
+
 	var methods []*Method
 	for _, resource := range resources {
 		method := &Method{
@@ -331,14 +331,14 @@ func TestServiceResourceAssociations(t *testing.T) {
 		}
 		methods = append(methods, method)
 	}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: methods,
 	}
-	
+
 	assert.Len(t, service.Methods, len(resources))
-	
+
 	// Verify resource associations
 	for i, expectedResource := range resources {
 		assert.Equal(t, expectedResource, service.Methods[i].Resource)
@@ -350,7 +350,7 @@ func TestServiceResourceAssociations(t *testing.T) {
 func TestServiceMethodOrder(t *testing.T) {
 	// Test that service preserves method order
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	methods := []*Method{
 		{IsPublic: true, RequestType: "First"},
 		{IsPublic: false, Permission: "read", RequestType: "Second"},
@@ -358,18 +358,18 @@ func TestServiceMethodOrder(t *testing.T) {
 		{IsPublic: false, Permission: "write", RequestType: "Fourth"},
 		{IsPublic: false, Permission: "admin", RequestType: "Fifth"},
 	}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: methods,
 	}
-	
+
 	// Verify order is preserved
 	expectedRequestTypes := []string{"First", "Second", "Third", "Fourth", "Fifth"}
 	for i, expectedType := range expectedRequestTypes {
 		assert.Equal(t, expectedType, service.Methods[i].RequestType)
 	}
-	
+
 	// Verify the exact same method instances
 	for i, expectedMethod := range methods {
 		assert.Same(t, expectedMethod, service.Methods[i], "Method instance should be preserved")
@@ -379,12 +379,12 @@ func TestServiceMethodOrder(t *testing.T) {
 func TestServiceFileAssociation(t *testing.T) {
 	// Test service association with generated file
 	mockFile := &protogen.GeneratedFile{}
-	
+
 	service := &Service{
 		file:    mockFile,
 		Methods: []*Method{},
 	}
-	
+
 	assert.Same(t, mockFile, service.file, "Service should maintain reference to generated file")
 }
 
@@ -441,7 +441,7 @@ func TestServiceValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test basic validation logic
 			isValid := true
-			
+
 			for _, method := range tt.service.Methods {
 				// Basic validation rules
 				if !method.IsPublic && method.Permission == "" {
@@ -457,7 +457,7 @@ func TestServiceValidation(t *testing.T) {
 					break
 				}
 			}
-			
+
 			assert.Equal(t, tt.isValid, isValid, tt.description)
 		})
 	}

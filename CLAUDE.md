@@ -10,9 +10,30 @@ This is `protoc-gen-connectrpc-permify`, a protoc plugin that generates Permify 
 
 ### Development
 - `make build` - Build the plugin binary to `./bin/protoc-gen-connectrpc-permify`
-- `make test` - Run all tests with verbose output
-- `make clean` - Remove the `./bin` directory
+- `make test` - Run comprehensive test suite with verbose output
+- `make clean` - Remove build artifacts and coverage files
 - `make update` - Update Go modules
+
+### Testing & Quality
+- `make test-unit` - Run unit tests only (permify/model/ components)
+- `make test-integration` - Run integration and golden file tests
+- `make test-error-conditions` - Run error condition and edge case tests
+- `make test-coverage` - Full test coverage report with HTML output
+- `make test-coverage-summary` - Quick coverage summary
+- `make fmt` - Format code using go fmt
+- `make vet` - Run go vet for code analysis
+- `make check` - Comprehensive check (format, vet, test with coverage)
+- `make ci` - CI pipeline (format, vet, test, race detection)
+
+### Available test categories:
+- **Unit Tests**: Test individual components (path, resource, method, service)
+- **Integration Tests**: Test full plugin workflow and golden file validation
+- **Error Condition Tests**: Test error handling and edge cases
+- **Golden File Tests**: Validate expected code generation output
+- **Performance Tests**: Baseline performance and load testing
+- **Edge Case Tests**: Complex scenarios (Unicode, deep nesting, boundary conditions)
+
+Current test coverage can be checked with `make test-coverage-summary`.
 
 ### Example Project
 The `example/` directory contains a sample project that demonstrates plugin usage:
