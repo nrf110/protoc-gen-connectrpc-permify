@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+
+option go_package = "test/v1;testv1";
+
+message Organization {
+  option (nrf110.permify.v1.resource_type) = "Organization";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string tenant_id = 2 [(nrf110.permify.v1.tenant_id) = true];
+}
+
+message Project {
+  option (nrf110.permify.v1.resource_type) = "Project";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string name = 2;
+}
+
+message NestedRequest {
+  Organization organization = 1;
+  repeated Project projects = 2;
+  string metadata = 3;
+}
+
+message Response {
+  string status = 1;
+}
+
+service NestedService {
+  rpc ProcessNested(NestedRequest) returns (Response) {
+    option (nrf110.permify.v1.permission) = "manage";
+  }
+}

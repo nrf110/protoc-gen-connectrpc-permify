@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+
+option go_package = "test/v1;testv1";
+
+message SimpleRequest {
+  string query = 1;
+}
+
+message UserResource {
+  option (nrf110.permify.v1.resource_type) = "User";
+
+  string user_id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string company_id = 2 [(nrf110.permify.v1.tenant_id) = true];
+  string email = 3 [(nrf110.permify.v1.attribute_name) = "email"];
+  string role = 4 [(nrf110.permify.v1.attribute_name) = "role"];
+}
+
+message Response {
+  string data = 1;
+}
+
+service MixedService {
+  // Public endpoint - no auth needed
+  rpc GetPublicInfo(SimpleRequest) returns (Response) {
+    option (nrf110.permify.v1.public) = true;
+  }
+  
+  // Protected endpoint - requires permission
+  rpc GetUser(UserResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+  
+  // Another protected endpoint with different permission
+  rpc UpdateUser(UserResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "write";
+  }
+  
+  // Admin only endpoint
+  rpc DeleteUser(UserResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "admin";
+  }
+}

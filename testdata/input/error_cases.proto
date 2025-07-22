@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+
+option go_package = "test/v1;testv1";
+
+// Case 1: Message without resource_type but used in permission method
+message NoResourceType {
+  string id = 1;
+  string name = 2;
+}
+
+// Case 2: Resource without resource_id
+message NoResourceId {
+  option (nrf110.permify.v1.resource_type) = "BadResource";
+
+  string name = 1;
+  string description = 2;
+}
+
+// Case 3: Valid resource for comparison
+message ValidResource {
+  option (nrf110.permify.v1.resource_type) = "Valid";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string name = 2;
+}
+
+message Response {
+  string status = 1;
+}
+
+service ErrorCaseService {
+  // This should error - no permission or public annotation
+  rpc NoAnnotation(ValidResource) returns (Response);
+  
+  // This should error - resource without resource_id
+  rpc BadResource(NoResourceId) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+  
+  // This should error - non-resource type in permission method
+  rpc NonResource(NoResourceType) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+  
+  // This should work - valid case
+  rpc ValidCase(ValidResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+}

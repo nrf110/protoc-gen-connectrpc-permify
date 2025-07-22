@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+
+option go_package = "test/v1;testv1";
+
+message PublicRequest {
+  string name = 1;
+}
+
+message Response {
+  string status = 1;
+}
+
+service PublicService {
+  rpc GetPublic(PublicRequest) returns (Response) {
+    option (nrf110.permify.v1.public) = true;
+  }
+}

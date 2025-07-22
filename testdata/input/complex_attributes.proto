@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+
+option go_package = "test/v1;testv1";
+
+message AttributeData {
+  string category = 1 [(nrf110.permify.v1.attribute_name) = "category"];
+  int32 priority = 2 [(nrf110.permify.v1.attribute_name) = "priority"];
+}
+
+message ComplexResource {
+  option (nrf110.permify.v1.resource_type) = "Document";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string tenant_id = 2 [(nrf110.permify.v1.tenant_id) = true];
+  repeated AttributeData attributes = 3;
+  map<string, string> tags = 4 [(nrf110.permify.v1.attribute_name) = "tags"];
+  string department = 5 [(nrf110.permify.v1.attribute_name) = "department"];
+}
+
+message Response {
+  string status = 1;
+}
+
+service AttributeService {
+  rpc ProcessDocument(ComplexResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "process";
+  }
+}
