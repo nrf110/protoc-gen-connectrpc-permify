@@ -4,6 +4,7 @@ import (
 	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/model"
 	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/util"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/pluginpb"
 )
 
 func main() {
@@ -11,6 +12,7 @@ func main() {
 	defer util.LogFile.Close()
 
 	protogen.Options{}.Run(func(plugin *protogen.Plugin) error {
+		plugin.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
 		for _, f := range plugin.Files {
 			if !f.Generate {
 				continue
