@@ -172,7 +172,7 @@ func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel 
 		}
 		file.P(util.Indent(nestingLevel), "}")
 	} else {
-		if resource.IdPath != nil {
+		if resource.IdPath != nil || resource.TenantIdPath != nil || resource.AttributePaths != nil {
 			file.P(util.Indent(nestingLevel), "resource := ", remainingPath.Path)
 		}
 		resource.checksFromIds(resource.IdPath, nestingLevel, usedLoopVars)
