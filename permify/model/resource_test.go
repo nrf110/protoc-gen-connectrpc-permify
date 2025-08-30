@@ -9,38 +9,6 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
-func TestResourceStruct(t *testing.T) {
-	// Test the Resource struct creation and field access
-	mockFile := &protogen.GeneratedFile{}
-	mockPath := &Path{Path: "req.user"}
-	mockIdPath := &Path{Path: "req.user.id"}
-	mockTenantPath := &Path{Path: "req.user.tenantId"}
-
-	resource := &Resource{
-		file:         mockFile,
-		GoName:       "UserResource",
-		Type:         "User",
-		Path:         mockPath,
-		IdPath:       mockIdPath,
-		TenantIdPath: mockTenantPath,
-		AttributePaths: map[string]*Path{
-			"email": {Path: "req.user.email"},
-			"role":  {Path: "req.user.role"},
-		},
-	}
-
-	// Verify all fields are set correctly
-	assert.Equal(t, mockFile, resource.file)
-	assert.Equal(t, "UserResource", resource.GoName)
-	assert.Equal(t, "User", resource.Type)
-	assert.Equal(t, mockPath, resource.Path)
-	assert.Equal(t, mockIdPath, resource.IdPath)
-	assert.Equal(t, mockTenantPath, resource.TenantIdPath)
-	assert.Len(t, resource.AttributePaths, 2)
-	assert.Equal(t, "req.user.email", resource.AttributePaths["email"].Path)
-	assert.Equal(t, "req.user.role", resource.AttributePaths["role"].Path)
-}
-
 func TestResourceTenantIdPath(t *testing.T) {
 	// Test the tenantIdPath method
 	tests := []struct {

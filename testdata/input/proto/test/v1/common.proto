@@ -1,14 +1,13 @@
 syntax = "proto3";
 
-package example.v1;
+package test.v1;
 
 import "nrf110/permify/v1/permify.proto";
 
-option go_package = "github.com/example/example-service/output/input/proto/example/v1;examplev1";
+option go_package = "test/v1;testv1";
 
 message Response {
-  string id = 1;
-  string name = 2;
+  string status = 1;
 }
 
 message NestedIds {
@@ -19,5 +18,5 @@ message NestedIds {
 message NestedResource {
   option (nrf110.permify.v1.resource_type) = "Nested";
 
-  NestedIds nestedIds = 1;
+  NestedIds nested_ids = 1;
 }

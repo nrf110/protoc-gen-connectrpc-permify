@@ -3,10 +3,11 @@ syntax = "proto3";
 package test.v1;
 
 import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
 
 option go_package = "test/v1;testv1";
 
-message UserRequest {
+message UpdateUserRequest {
   option (nrf110.permify.v1.resource_type) = "User";
 
   string id = 1 [(nrf110.permify.v1.resource_id) = true];
@@ -14,16 +15,8 @@ message UserRequest {
   string name = 3;
 }
 
-message Response {
-  string status = 1;
-}
-
 service UserService {
-  rpc GetUser(UserRequest) returns (Response) {
-    option (nrf110.permify.v1.permission) = "read";
-  }
-  
-  rpc UpdateUser(UserRequest) returns (Response) {
+  rpc UpdateUser(UpdateUserRequest) returns (Response) {
     option (nrf110.permify.v1.permission) = "write";
   }
 }

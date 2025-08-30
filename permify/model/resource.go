@@ -26,6 +26,10 @@ func NewResource(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *prot
 	return findResourcePath(plugin, file, pb, NewRootPathBuilder("req", file))
 }
 
+func (resource *Resource) Generate(nestingLevel int) {
+	resource.checksFromResources(resource.Path, nestingLevel, make(map[string]bool))
+}
+
 func findResourcePath(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *protogen.Message, path *PathBuilder) *Resource {
 	options := pb.Desc.Options()
 	if proto.HasExtension(options, permifyv1.E_ResourceType) {
@@ -155,10 +159,6 @@ func findTenantPath(pb *protogen.Message, path *PathBuilder) *Path {
 	return nil
 }
 
-func (resource *Resource) Generate(nestingLevel int) {
-	resource.checksFromResources(resource.Path, nestingLevel, make(map[string]bool))
-}
-
 func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
 	file := resource.file
 	if remainingPath.Child != nil {
@@ -172,50 +172,59 @@ func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel 
 		}
 		file.P(util.Indent(nestingLevel), "}")
 	} else {
-		if resource.IdPath != nil || resource.TenantIdPath != nil || resource.AttributePaths != nil {
+		if resource.IdPath != nil || resource.TenantIdPath != nil || len(resource.AttributePaths) > 0 {
 			file.P(util.Indent(nestingLevel), "resource := ", remainingPath.Path)
 		}
-		resource.checksFromIds(resource.IdPath, nestingLevel, usedLoopVars)
+
+		var idPath string
+		if resource.IdPath != nil {
+			idPath = resource.renderId(resource.IdPath, nestingLevel, usedLoopVars)
+		}
+		file.P(util.Indent(nestingLevel), `tenantId := "default"`)
+		if resource.TenantIdPath != nil {
+			resource.renderTenantId(resource.TenantIdPath, nestingLevel, usedLoopVars)
+		}
+		resource.renderAttributes(nestingLevel, usedLoopVars)
+		resource.renderCheck(nestingLevel, idPath)
+		file.P(util.Indent(nestingLevel), "checks = append(checks, check)")
 	}
 }
 
-func (resource *Resource) checksFromIds(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) renderId(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) string {
 	file := resource.file
 
 	if remainingPath != nil && remainingPath.Child != nil {
 		varName := loopVar(usedLoopVars)
 		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
-		resource.checksFromIds(remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+		result := resource.renderId(remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
 		file.P(util.Indent(nestingLevel), "}")
+		return result
 	} else {
-		file.P(util.Indent(nestingLevel), `tenantId := "default"`)
-		if resource.TenantIdPath != nil {
-			var sb strings.Builder
-			file.P(util.Indent(nestingLevel), "if ", resource.checkTenantId(&sb, resource.TenantIdPath, ""), "{")
-			file.P(util.Indent(nestingLevel+1), "tenantId = ", resource.tenantIdPath())
-			file.P(util.Indent(nestingLevel), "}")
-		}
-		// if resource.AttributePaths != nil {
-		// 	file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
-		// 	for name, path := range resource.AttributePaths {
-		// 		resource.checkAttributes(name, path, nestingLevel, usedLoopVars)
-		// 	}
-		// }
-		file.P(util.Indent(nestingLevel), "check := pkg.Check {")
-		file.P(util.Indent(nestingLevel+1), "TenantID:     tenantId,")
-		file.P(util.Indent(nestingLevel+1), "Permission:   permission,")
-		file.P(util.Indent(nestingLevel+1), "Entity: &pkg.Resource {")
-		file.P(util.Indent(nestingLevel+2), `Type:       "`, resource.Type, `",`)
-		if remainingPath != nil {
-			file.P(util.Indent(nestingLevel+2), "ID:        ", remainingPath.Path, ",")
-		}
-		// if resource.AttributePaths != nil {
-		// 	file.P(util.Indent(nestingLevel+2), "Attributes: attributes,")
-		// }
-		file.P(util.Indent(nestingLevel+1), "},")
-		file.P(util.Indent(nestingLevel), "}")
-		file.P(util.Indent(nestingLevel), "checks = append(checks, check)")
+		return remainingPath.Path
 	}
+}
+
+func (resource *Resource) renderTenantId(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+	var (
+		sb   strings.Builder
+		file = resource.file
+	)
+	file.P(util.Indent(nestingLevel), "if ", resource.checkTenantId(&sb, resource.TenantIdPath, ""), "{")
+	file.P(util.Indent(nestingLevel+1), "tenantId = ", resource.tenantIdPath())
+	file.P(util.Indent(nestingLevel), "}")
+}
+
+func (resource *Resource) tenantIdPath() string {
+	var sb strings.Builder
+	currentPath := resource.TenantIdPath
+	for currentPath != nil {
+		sb.WriteString(currentPath.Path)
+		if currentPath.Child != nil {
+			sb.WriteString(".")
+		}
+		currentPath = currentPath.Child
+	}
+	return sb.String()
 }
 
 func (resource *Resource) checkTenantId(sb *strings.Builder, remainingPath *Path, checkedPath string) string {
@@ -236,28 +245,42 @@ func (resource *Resource) checkTenantId(sb *strings.Builder, remainingPath *Path
 	return sb.String()
 }
 
-func (resource *Resource) checkAttributes(name string, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) renderAttributes(nestingLevel int, usedLoopVars map[string]bool) {
+	file := resource.file
+
+	file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
+	for name, path := range resource.AttributePaths {
+		resource.renderAttribute(name, path, nestingLevel, usedLoopVars)
+	}
+}
+
+func (resource *Resource) renderAttribute(name string, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
 	file := resource.file
 
 	if remainingPath.Child != nil {
 		varName := loopVar(usedLoopVars)
 		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
-		resource.checkAttributes(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+		resource.renderAttribute(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
 		file.P(util.Indent(nestingLevel), "}")
+	} else {
+		file.P(util.Indent(nestingLevel+1), `attributes["`, name, `"] = `, remainingPath.Path)
 	}
 }
 
-func (resource *Resource) tenantIdPath() string {
-	var sb strings.Builder
-	currentPath := resource.TenantIdPath
-	for currentPath != nil {
-		sb.WriteString(currentPath.Path)
-		if currentPath.Child != nil {
-			sb.WriteString(".")
-		}
-		currentPath = currentPath.Child
+func (resource *Resource) renderCheck(nestingLevel int, idPath string) {
+	file := resource.file
+
+	file.P(util.Indent(nestingLevel), "check := pkg.Check {")
+	file.P(util.Indent(nestingLevel+1), "TenantID:     tenantId,")
+	file.P(util.Indent(nestingLevel+1), "Permission:   permission,")
+	file.P(util.Indent(nestingLevel+1), "Entity: &pkg.Resource {")
+	file.P(util.Indent(nestingLevel+2), `Type:       "`, resource.Type, `",`)
+	if idPath != "" {
+		file.P(util.Indent(nestingLevel+2), "ID:        ", idPath, ",")
 	}
-	return sb.String()
+	file.P(util.Indent(nestingLevel+2), "Attributes: attributes,")
+	file.P(util.Indent(nestingLevel+1), "},")
+	file.P(util.Indent(nestingLevel), "}")
 }
 
 func loopVar(inUse map[string]bool) string {

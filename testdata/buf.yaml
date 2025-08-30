@@ -1,10 +1,11 @@
 version: v2
-name: github.com/example/example-service
 lint:
   use:
     - DEFAULT
 breaking:
   use:
     - FILE
+modules:
+  - path: input/proto
 deps:
   - buf.build/nrf110/connectrpc-permify

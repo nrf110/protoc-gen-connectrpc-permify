@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package example.v1;
+package test.v1;
 
-import "input/proto/example/v1/common.proto";
 import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
 
-option go_package = "github.com/example/example-service/output/input/proto/example/v1;examplev1";
+option go_package = "test/v1;testv1";
 
 message NestedAttribute {
   string foo = 1 [(nrf110.permify.v1.attribute_name) = "foo"];

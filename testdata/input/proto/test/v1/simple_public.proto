@@ -3,15 +3,13 @@ syntax = "proto3";
 package test.v1;
 
 import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
 
 option go_package = "test/v1;testv1";
 
 message PublicRequest {
+  option (nrf110.permify.v1.resource_type) = "Public";
   string name = 1;
-}
-
-message Response {
-  string status = 1;
 }
 
 service PublicService {

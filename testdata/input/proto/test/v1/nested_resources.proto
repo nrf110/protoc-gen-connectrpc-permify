@@ -3,6 +3,7 @@ syntax = "proto3";
 package test.v1;
 
 import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
 
 option go_package = "test/v1;testv1";
 
@@ -24,10 +25,6 @@ message NestedRequest {
   Organization organization = 1;
   repeated Project projects = 2;
   string metadata = 3;
-}
-
-message Response {
-  string status = 1;
 }
 
 service NestedService {

@@ -3,6 +3,7 @@ syntax = "proto3";
 package test.v1;
 
 import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
 
 option go_package = "test/v1;testv1";
 
@@ -10,7 +11,13 @@ message SimpleRequest {
   string query = 1;
 }
 
-message UserResource {
+message GetUserResource {
+  option (nrf110.permify.v1.resource_type) = "User";
+
+  string user_id = 1 [(nrf110.permify.v1.resource_id) = true];
+}
+
+message UpdateUserResource {
   option (nrf110.permify.v1.resource_type) = "User";
 
   string user_id = 1 [(nrf110.permify.v1.resource_id) = true];
@@ -19,8 +26,10 @@ message UserResource {
   string role = 4 [(nrf110.permify.v1.attribute_name) = "role"];
 }
 
-message Response {
-  string data = 1;
+message DeleteUserResource {
+  option (nrf110.permify.v1.resource_type) = "User";
+
+  string user_id = 1 [(nrf110.permify.v1.resource_id) = true];
 }
 
 service MixedService {
@@ -28,19 +37,19 @@ service MixedService {
   rpc GetPublicInfo(SimpleRequest) returns (Response) {
     option (nrf110.permify.v1.public) = true;
   }
-  
+
   // Protected endpoint - requires permission
-  rpc GetUser(UserResource) returns (Response) {
+  rpc GetUser(GetUserResource) returns (Response) {
     option (nrf110.permify.v1.permission) = "read";
   }
-  
+
   // Another protected endpoint with different permission
-  rpc UpdateUser(UserResource) returns (Response) {
+  rpc UpdateUser(UpdateUserResource) returns (Response) {
     option (nrf110.permify.v1.permission) = "write";
   }
-  
+
   // Admin only endpoint
-  rpc DeleteUser(UserResource) returns (Response) {
+  rpc DeleteUser(DeleteUserResource) returns (Response) {
     option (nrf110.permify.v1.permission) = "admin";
   }
 }

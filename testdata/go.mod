@@ -4,8 +4,8 @@ go 1.24.4
 
 require (
 	github.com/bufbuild/connect-go v1.10.0
-	github.com/nrf110/connectrpc-permify v0.2.0
-	google.golang.org/protobuf v1.36.6
+	github.com/nrf110/connectrpc-permify v0.3.0
+	google.golang.org/protobuf v1.36.8
 )
 
 require (

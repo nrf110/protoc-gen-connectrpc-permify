@@ -3,6 +3,7 @@ syntax = "proto3";
 package test.v1;
 
 import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
 
 option go_package = "test/v1;testv1";
 
@@ -19,10 +20,6 @@ message ComplexResource {
   repeated AttributeData attributes = 3;
   map<string, string> tags = 4 [(nrf110.permify.v1.attribute_name) = "tags"];
   string department = 5 [(nrf110.permify.v1.attribute_name) = "department"];
-}
-
-message Response {
-  string status = 1;
 }
 
 service AttributeService {

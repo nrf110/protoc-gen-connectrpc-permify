@@ -11,3 +11,8 @@ update:
 gen: clean update
 	buf generate
 	go mod tidy
+
+.PHONY: golden
+golden:
+	rm -rf golden
+	cp -R output golden
