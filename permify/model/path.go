@@ -2,9 +2,10 @@ package model
 
 import (
 	"fmt"
+	"strings"
+
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"strings"
 )
 
 type fieldHolder struct {
@@ -153,4 +154,29 @@ func (path *Path) WithPrefix(prefix string) *Path {
 		path.Path = fmt.Sprintf("%s.%s", prefix, path.Path)
 	}
 	return path
+}
+
+func (path *Path) IsSlice() bool {
+	return strings.HasPrefix(path.VariableType, "[")
+}
+
+func (path *Path) IsMap() bool {
+	return strings.HasPrefix(path.VariableType, "map[")
+}
+
+func (path *Path) IsPointer() bool {
+	return strings.HasPrefix(path.VariableType, "*")
+}
+
+func (path *Path) String() string {
+	var sb strings.Builder
+	currentPath := path
+	for currentPath != nil {
+		sb.WriteString(currentPath.Path)
+		if currentPath.Child != nil {
+			sb.WriteString(".")
+		}
+		currentPath = currentPath.Child
+	}
+	return sb.String()
 }

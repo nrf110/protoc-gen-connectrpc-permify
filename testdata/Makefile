@@ -1,5 +1,6 @@
 .PHONY: clean
 clean:
+	rm -f gen.log
 	rm -rf output
 
 .PHONY: update

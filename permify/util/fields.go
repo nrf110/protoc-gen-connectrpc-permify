@@ -1,13 +1,13 @@
 package util
 
 import (
+	"slices"
+
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"slices"
 )
 
 var IdKinds = []protoreflect.Kind{
-	protoreflect.EnumKind,
 	protoreflect.Int32Kind,
 	protoreflect.Sint32Kind,
 	protoreflect.Uint32Kind,

@@ -8,7 +8,7 @@ import (
 	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/util"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/runtime/protoimpl"
 )
 
 type Resource struct {
@@ -40,8 +40,8 @@ func findResourcePath(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb 
 			GoName:         pb.GoIdent.GoName,
 			Type:           resourceType,
 			Path:           path.Build(),
-			IdPath:         findIdPath(plugin, pb, NewRootPathBuilder("resource", file)),
-			TenantIdPath:   findTenantPath(pb, NewRootPathBuilder("resource", file)),
+			IdPath:         findPath(plugin, pb, permifyv1.E_ResourceId, NewRootPathBuilder("resource", file)),
+			TenantIdPath:   findPath(plugin, pb, permifyv1.E_TenantId, NewRootPathBuilder("resource", file)),
 			AttributePaths: findAttributes(plugin, pb, NewRootPathBuilder("resource", file), make(map[string]*Path)),
 		}
 	}
@@ -76,39 +76,21 @@ func findResourcePath(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb 
 	return nil
 }
 
-func findIdPath(plugin *protogen.Plugin, pb *protogen.Message, path *PathBuilder) *Path {
+func findPath(plugin *protogen.Plugin, pb *protogen.Message, extension *protoimpl.ExtensionInfo, path *PathBuilder) *Path {
 	for _, field := range pb.Fields {
-		if util.GetBoolExtension(field.Desc, permifyv1.E_ResourceId) {
-			if field.Desc.IsList() {
-				if !util.IsIdField(field) {
-					plugin.Error(fmt.Errorf("%s must be a string, enum, or integer type or a list or map of those types", field.GoName))
-				}
-				return NewPathBuilder(path.AddField(field)).Build()
-			}
-
-			if field.Desc.IsMap() {
-				if !util.IsIdKind(field.Desc.MapValue().Kind()) {
-					plugin.Error(fmt.Errorf("%s must be a string, enum, or integer type or a list or map of those types", field.GoName))
-				}
-				return NewPathBuilder(path.AddField(field)).Build()
+		if util.GetBoolExtension(field.Desc, extension) {
+			if !util.IsIdField(field) {
+				plugin.Error(fmt.Errorf("%s must be a string or integer type", field.GoName))
 			}
 			return path.AddField(field).Build()
 		}
 
-		if util.IsMessageValueMap(field) {
-			if result := findIdPath(plugin, util.GetMapFieldValue(field), NewPathBuilder(path.AddField(field))); result != nil {
-				return result
-			}
-		}
-
 		if util.IsMessage(field) {
-			if field.Desc.IsList() {
-				if result := findIdPath(plugin, field.Message, NewPathBuilder(path.AddField(field))); result != nil {
-					return result
-				}
+			if field.Desc.IsList() || field.Desc.IsMap() {
+				continue
 			}
 
-			if result := findIdPath(plugin, field.Message, path.AddField(field)); result != nil {
+			if result := findPath(plugin, field.Message, extension, NewPathBuilder(path).AddField(field)); result != nil {
 				return result
 			}
 		}
@@ -140,25 +122,6 @@ func findAttributes(plugin *protogen.Plugin, pb *protogen.Message, path *PathBui
 	return accum
 }
 
-func findTenantPath(pb *protogen.Message, path *PathBuilder) *Path {
-	for _, field := range pb.Fields {
-		if field.Desc.IsList() || field.Desc.IsMap() {
-			continue
-		}
-
-		if util.GetBoolExtension(field.Desc, permifyv1.E_TenantId) {
-			return path.AddField(field).Build()
-		}
-
-		if field.Desc.Kind() == protoreflect.MessageKind {
-			if result := findTenantPath(field.Message, NewPathBuilder(path).AddField(field)); result != nil {
-				return result
-			}
-		}
-	}
-	return nil
-}
-
 func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
 	file := resource.file
 	if remainingPath.Child != nil {
@@ -177,12 +140,14 @@ func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel 
 		}
 
 		var idPath string
+		file.P(util.Indent(nestingLevel), `var id string`)
 		if resource.IdPath != nil {
-			idPath = resource.renderId(resource.IdPath, nestingLevel, usedLoopVars)
+			util.Log.Printf("rendering id path for %v", resource.IdPath)
+			resource.renderIdPath(resource.IdPath, nestingLevel, "id")
 		}
 		file.P(util.Indent(nestingLevel), `tenantId := "default"`)
 		if resource.TenantIdPath != nil {
-			resource.renderTenantId(resource.TenantIdPath, nestingLevel, usedLoopVars)
+			resource.renderIdPath(resource.TenantIdPath, nestingLevel, "tenantId")
 		}
 		resource.renderAttributes(nestingLevel, usedLoopVars)
 		resource.renderCheck(nestingLevel, idPath)
@@ -190,44 +155,17 @@ func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel 
 	}
 }
 
-func (resource *Resource) renderId(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) string {
-	file := resource.file
-
-	if remainingPath != nil && remainingPath.Child != nil {
-		varName := loopVar(usedLoopVars)
-		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
-		result := resource.renderId(remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
-		file.P(util.Indent(nestingLevel), "}")
-		return result
-	} else {
-		return remainingPath.Path
-	}
-}
-
-func (resource *Resource) renderTenantId(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) renderIdPath(path *Path, nestingLevel int, varName string) {
 	var (
 		sb   strings.Builder
 		file = resource.file
 	)
-	file.P(util.Indent(nestingLevel), "if ", resource.checkTenantId(&sb, resource.TenantIdPath, ""), "{")
-	file.P(util.Indent(nestingLevel+1), "tenantId = ", resource.tenantIdPath())
+	file.P(util.Indent(nestingLevel), "if ", resource.renderNilChecks(&sb, path, ""), "{")
+	file.P(util.Indent(nestingLevel+1), varName, " = ", path)
 	file.P(util.Indent(nestingLevel), "}")
 }
 
-func (resource *Resource) tenantIdPath() string {
-	var sb strings.Builder
-	currentPath := resource.TenantIdPath
-	for currentPath != nil {
-		sb.WriteString(currentPath.Path)
-		if currentPath.Child != nil {
-			sb.WriteString(".")
-		}
-		currentPath = currentPath.Child
-	}
-	return sb.String()
-}
-
-func (resource *Resource) checkTenantId(sb *strings.Builder, remainingPath *Path, checkedPath string) string {
+func (resource *Resource) renderNilChecks(sb *strings.Builder, remainingPath *Path, checkedPath string) string {
 	var cumulativePath string
 	if checkedPath == "" {
 		cumulativePath = remainingPath.Path
@@ -238,7 +176,7 @@ func (resource *Resource) checkTenantId(sb *strings.Builder, remainingPath *Path
 	sb.WriteString(cumulativePath)
 	if remainingPath.Child != nil {
 		sb.WriteString(" != nil &&")
-		return resource.checkTenantId(sb, remainingPath.Child, cumulativePath)
+		return resource.renderNilChecks(sb, remainingPath.Child, cumulativePath)
 	} else {
 		sb.WriteString(` != ""`)
 	}
@@ -275,10 +213,8 @@ func (resource *Resource) renderCheck(nestingLevel int, idPath string) {
 	file.P(util.Indent(nestingLevel+1), "Permission:   permission,")
 	file.P(util.Indent(nestingLevel+1), "Entity: &pkg.Resource {")
 	file.P(util.Indent(nestingLevel+2), `Type:       "`, resource.Type, `",`)
-	if idPath != "" {
-		file.P(util.Indent(nestingLevel+2), "ID:        ", idPath, ",")
-	}
-	file.P(util.Indent(nestingLevel+2), "Attributes: attributes,")
+	file.P(util.Indent(nestingLevel+2), `ID:         id,`)
+	file.P(util.Indent(nestingLevel+2), `Attributes: attributes,`)
 	file.P(util.Indent(nestingLevel+1), "},")
 	file.P(util.Indent(nestingLevel), "}")
 }
