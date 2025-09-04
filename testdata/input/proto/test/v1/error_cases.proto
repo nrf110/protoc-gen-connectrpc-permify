@@ -7,44 +7,58 @@ import "test/v1/common.proto";
 
 option go_package = "test/v1;testv1";
 
-// Case 1: Message without resource_type but used in permission method
-// message NoResourceType {
-//   string id = 1;
-//   string name = 2;
-// }
+// Case 1: Resource without resource_id
+message NoResourceId {
+  option (nrf110.permify.v1.resource_type) = "BadResource";
 
-// // Case 2: Resource without resource_id
-// message NoResourceId {
-//   option (nrf110.permify.v1.resource_type) = "BadResource";
+  string name = 1;
+  string description = 2;
+}
 
-//   string name = 1;
-//   string description = 2;
-// }
+// Case 2: Valid resource for comparison
+message ValidResource {
+  option (nrf110.permify.v1.resource_type) = "Valid";
 
-// // Case 3: Valid resource for comparison
-// message ValidResource {
-//   option (nrf110.permify.v1.resource_type) = "Valid";
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string name = 2;
+}
 
-//   string id = 1 [(nrf110.permify.v1.resource_id) = true];
-//   string name = 2;
-// }
+// Case 3: Resource with multiple resource_id fields (should handle or error gracefully)
+message MultipleResourceIds {
+  option (nrf110.permify.v1.resource_type) = "MultiId";
 
-// service ErrorCaseService {
-//   // This should error - no permission or public annotation
-//   rpc NoAnnotation(ValidResource) returns (Response);
+  string id1 = 1 [(nrf110.permify.v1.resource_id) = true];
+  string id2 = 2 [(nrf110.permify.v1.resource_id) = true];
+  string tenant_id = 3 [(nrf110.permify.v1.tenant_id) = true];
+}
 
-//   // This should error - resource without resource_id
-//   rpc BadResource(NoResourceId) returns (Response) {
-//     option (nrf110.permify.v1.permission) = "read";
-//   }
+// Case 4: Resource with multiple tenant_id fields
+message MultipleTenantIds {
+  option (nrf110.permify.v1.resource_type) = "MultiTenant";
 
-//   // This should error - non-resource type in permission method
-//   rpc NonResource(NoResourceType) returns (Response) {
-//     option (nrf110.permify.v1.permission) = "read";
-//   }
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string tenant1 = 2 [(nrf110.permify.v1.tenant_id) = true];
+  string tenant2 = 3 [(nrf110.permify.v1.tenant_id) = true];
+}
 
-//   // This should work - valid case
-//   rpc ValidCase(ValidResource) returns (Response) {
-//     option (nrf110.permify.v1.permission) = "read";
-//   }
-// }
+service ErrorCaseService {
+  // This should error - resource without resource_id
+  rpc BadResource(NoResourceId) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+
+  // This should work - valid case
+  rpc ValidCase(ValidResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+
+  // Edge case - multiple resource IDs
+  rpc MultipleIds(MultipleResourceIds) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+
+  // Edge case - multiple tenant IDs
+  rpc MultipleTenants(MultipleTenantIds) returns (Response) {
+    option (nrf110.permify.v1.permission) = "write";
+  }
+}

@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
+
+option go_package = "test/v1;testv1";
+
+message Level3Resource {
+  option (nrf110.permify.v1.resource_type) = "Level3";
+  
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string data = 2 [(nrf110.permify.v1.attribute_name) = "level3_data"];
+}
+
+message Level2Container {
+  Level3Resource resource = 1;
+  map<string, Level3Resource> resources_map = 2;
+  repeated Level3Resource resources_list = 3;
+}
+
+message Level1Container {
+  Level2Container level2 = 1;
+  repeated Level2Container level2_list = 2;
+}
+
+message DeepNestedRequest {
+  Level1Container container = 1;
+  string metadata = 2;
+}
+
+message VeryDeepIds {
+  string deep_id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string deep_tenant = 2 [(nrf110.permify.v1.tenant_id) = true];
+}
+
+message VeryDeepLevel3 {
+  VeryDeepIds ids = 1;
+}
+
+message VeryDeepLevel2 {
+  VeryDeepLevel3 level3 = 1;
+}
+
+message VeryDeepLevel1 {
+  VeryDeepLevel2 level2 = 1;
+}
+
+message VeryDeepResource {
+  option (nrf110.permify.v1.resource_type) = "VeryDeep";
+  
+  VeryDeepLevel1 level1 = 1;
+}
+
+service DeepNestingService {
+  rpc ProcessDeepNested(DeepNestedRequest) returns (Response) {
+    option (nrf110.permify.v1.permission) = "process";
+  }
+  
+  rpc ProcessVeryDeep(VeryDeepResource) returns (Response) {
+    option (nrf110.permify.v1.permission) = "admin";
+  }
+}

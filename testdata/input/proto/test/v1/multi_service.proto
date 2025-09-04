@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
+
+option go_package = "test/v1;testv1";
+
+message Account {
+  option (nrf110.permify.v1.resource_type) = "Account";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string org_id = 2 [(nrf110.permify.v1.tenant_id) = true];
+}
+
+message Profile {
+  option (nrf110.permify.v1.resource_type) = "Profile";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string account_id = 2;
+}
+
+message Settings {
+  option (nrf110.permify.v1.resource_type) = "Settings";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string profile_id = 2;
+}
+
+message PublicInfo {
+  string data = 1;
+}
+
+// First service - Account management
+service AccountService {
+  rpc GetAccount(Account) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+
+  rpc GetPublicAccountInfo(PublicInfo) returns (Response) {
+    option (nrf110.permify.v1.public) = true;
+  }
+}
+
+// Second service - Profile management
+service ProfileService {
+  rpc GetProfile(Profile) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+}
+
+// Third service - Settings management
+service SettingsService {
+  rpc GetSettings(Settings) returns (Response) {
+    option (nrf110.permify.v1.permission) = "read";
+  }
+}

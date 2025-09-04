@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
+
+option go_package = "test/v1;testv1";
+
+message Document {
+  option (nrf110.permify.v1.resource_type) = "Document";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string folder_id = 2;
+}
+
+message Folder {
+  option (nrf110.permify.v1.resource_type) = "Folder";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string workspace_id = 2;
+}
+
+message Workspace {
+  option (nrf110.permify.v1.resource_type) = "Workspace";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+  string tenant_id = 2 [(nrf110.permify.v1.tenant_id) = true];
+}
+
+message MultiResourceRequest {
+  Document document = 1;
+  Folder folder = 2;
+  Workspace workspace = 3;
+  repeated Document additional_docs = 4;
+  map<string, Folder> folder_map = 5;
+}
+
+service MultiResourceService {
+  rpc ProcessMultipleResources(MultiResourceRequest) returns (Response) {
+    option (nrf110.permify.v1.permission) = "manage";
+  }
+}

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package test.v1;
+
+import "nrf110/permify/v1/permify.proto";
+import "test/v1/common.proto";
+
+option go_package = "test/v1;testv1";
+
+message EmptyRequest {}
+
+message MinimalResource {
+  option (nrf110.permify.v1.resource_type) = "Minimal";
+
+  string id = 1 [(nrf110.permify.v1.resource_id) = true];
+}
+
+// Service with no methods
+service EmptyService {}
+
+// Service with only public methods
+service AllPublicService {
+  rpc PublicMethod1(EmptyRequest) returns (Response) {
+    option (nrf110.permify.v1.public) = true;
+  }
+
+  rpc PublicMethod2(MinimalResource) returns (Response) {
+    option (nrf110.permify.v1.public) = true;
+  }
+}
