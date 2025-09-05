@@ -42,8 +42,15 @@ A devcontainer is provided for ready-to-go development environment. If you want 
 - protoc-gen-go
 - protoc-gen-connect-go
 
+## Makefile
+
+There are 2 Makefiles in this repo:
+
+- The root level, which is responsible for building the plugin. Run `make help` for make target descriptions.
+- Under `testdata`, another Makefile is responsible for running the protobuf compiler with your plugin build to generate output
+
 ### Testing
 
 Testing protobuf compiler plugins is unfortunately tricky, as a lot of work would be required to mock out all of the AST nodes provided representing non-trivial protobuf files. Additionally, the compiler plugin must be built and tested from a shell command,
 
-Given that, there are very few true unit tests.
+Given that, there are very few true unit tests. Instead, we validate a "golden", manually validated set of output files against freshly generated output files. New features or behavior changes should include new/updated .proto files under `testdata/input`. After validating the new behavior, copy the output files to `tesdata/golden` and commit them.
