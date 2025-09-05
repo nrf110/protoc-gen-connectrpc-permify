@@ -188,20 +188,37 @@ func (resource *Resource) renderAttributes(nestingLevel int, usedLoopVars map[st
 
 	file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
 	for name, path := range resource.AttributePaths {
-		resource.renderAttribute(name, path, nestingLevel, usedLoopVars)
+		resource.renderAttribute(name, path, nestingLevel, usedLoopVars, false)
 	}
 }
 
-func (resource *Resource) renderAttribute(name string, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) renderAttribute(name string, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool, isNested bool) {
 	file := resource.file
 
 	if remainingPath.Child != nil {
+		// We have a nested collection, need to collect values into a slice
 		varName := loopVar(usedLoopVars)
+		if !isNested {
+			// First time entering a collection, initialize the slice
+			file.P(util.Indent(nestingLevel), "var ", name, "Values []any")
+		}
 		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
-		resource.renderAttribute(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+		resource.renderAttribute(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars, true)
 		file.P(util.Indent(nestingLevel), "}")
+		if !isNested {
+			// After collecting all values, assign to attributes
+			file.P(util.Indent(nestingLevel), `if len(`, name, `Values) > 0 {`)
+			file.P(util.Indent(nestingLevel+1), `attributes["`, name, `"] = `, name, `Values`)
+			file.P(util.Indent(nestingLevel), "}")
+		}
 	} else {
-		file.P(util.Indent(nestingLevel+1), `attributes["`, name, `"] = `, remainingPath.Path)
+		if isNested {
+			// We're inside a collection, append to the slice
+			file.P(util.Indent(nestingLevel), name, `Values = append(`, name, `Values, `, remainingPath.Path, `)`)
+		} else {
+			// Direct assignment for non-nested attributes
+			file.P(util.Indent(nestingLevel), `attributes["`, name, `"] = `, remainingPath.Path)
+		}
 	}
 }
 
