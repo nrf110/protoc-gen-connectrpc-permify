@@ -30,3 +30,20 @@ service UserService {
   }
 }
 ```
+
+## Local development
+
+### Dependencies
+
+A devcontainer is provided for ready-to-go development environment. If you want to develop without it, just make sure you have installed:
+
+- The currently used version of go
+- The Buf CLI
+- protoc-gen-go
+- protoc-gen-connect-go
+
+### Testing
+
+Testing protobuf compiler plugins is unfortunately tricky, as a lot of work would be required to mock out all of the AST nodes provided representing non-trivial protobuf files. Additionally, the compiler plugin must be built and tested from a shell command,
+
+Given that, there are very few true unit tests.
