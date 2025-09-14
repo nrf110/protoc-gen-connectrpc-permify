@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MultiResourceServiceName is the fully-qualified name of the MultiResourceService service.
@@ -40,7 +40,7 @@ const (
 
 // MultiResourceServiceClient is a client for the test.v1.MultiResourceService service.
 type MultiResourceServiceClient interface {
-	ProcessMultipleResources(context.Context, *connect_go.Request[v1.MultiResourceRequest]) (*connect_go.Response[v1.Response], error)
+	ProcessMultipleResources(context.Context, *connect.Request[v1.MultiResourceRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewMultiResourceServiceClient constructs a client for the test.v1.MultiResourceService service.
@@ -50,30 +50,32 @@ type MultiResourceServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMultiResourceServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MultiResourceServiceClient {
+func NewMultiResourceServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MultiResourceServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	multiResourceServiceMethods := v1.File_test_v1_multiple_resources_proto.Services().ByName("MultiResourceService").Methods()
 	return &multiResourceServiceClient{
-		processMultipleResources: connect_go.NewClient[v1.MultiResourceRequest, v1.Response](
+		processMultipleResources: connect.NewClient[v1.MultiResourceRequest, v1.Response](
 			httpClient,
 			baseURL+MultiResourceServiceProcessMultipleResourcesProcedure,
-			opts...,
+			connect.WithSchema(multiResourceServiceMethods.ByName("ProcessMultipleResources")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // multiResourceServiceClient implements MultiResourceServiceClient.
 type multiResourceServiceClient struct {
-	processMultipleResources *connect_go.Client[v1.MultiResourceRequest, v1.Response]
+	processMultipleResources *connect.Client[v1.MultiResourceRequest, v1.Response]
 }
 
 // ProcessMultipleResources calls test.v1.MultiResourceService.ProcessMultipleResources.
-func (c *multiResourceServiceClient) ProcessMultipleResources(ctx context.Context, req *connect_go.Request[v1.MultiResourceRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *multiResourceServiceClient) ProcessMultipleResources(ctx context.Context, req *connect.Request[v1.MultiResourceRequest]) (*connect.Response[v1.Response], error) {
 	return c.processMultipleResources.CallUnary(ctx, req)
 }
 
 // MultiResourceServiceHandler is an implementation of the test.v1.MultiResourceService service.
 type MultiResourceServiceHandler interface {
-	ProcessMultipleResources(context.Context, *connect_go.Request[v1.MultiResourceRequest]) (*connect_go.Response[v1.Response], error)
+	ProcessMultipleResources(context.Context, *connect.Request[v1.MultiResourceRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewMultiResourceServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -81,11 +83,13 @@ type MultiResourceServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMultiResourceServiceHandler(svc MultiResourceServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	multiResourceServiceProcessMultipleResourcesHandler := connect_go.NewUnaryHandler(
+func NewMultiResourceServiceHandler(svc MultiResourceServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	multiResourceServiceMethods := v1.File_test_v1_multiple_resources_proto.Services().ByName("MultiResourceService").Methods()
+	multiResourceServiceProcessMultipleResourcesHandler := connect.NewUnaryHandler(
 		MultiResourceServiceProcessMultipleResourcesProcedure,
 		svc.ProcessMultipleResources,
-		opts...,
+		connect.WithSchema(multiResourceServiceMethods.ByName("ProcessMultipleResources")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.MultiResourceService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -100,6 +104,6 @@ func NewMultiResourceServiceHandler(svc MultiResourceServiceHandler, opts ...con
 // UnimplementedMultiResourceServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedMultiResourceServiceHandler struct{}
 
-func (UnimplementedMultiResourceServiceHandler) ProcessMultipleResources(context.Context, *connect_go.Request[v1.MultiResourceRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.MultiResourceService.ProcessMultipleResources is not implemented"))
+func (UnimplementedMultiResourceServiceHandler) ProcessMultipleResources(context.Context, *connect.Request[v1.MultiResourceRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.MultiResourceService.ProcessMultipleResources is not implemented"))
 }

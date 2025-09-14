@@ -21,8 +21,8 @@ func (req *NoResourceId) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -47,8 +47,8 @@ func (req *ValidResource) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -76,8 +76,8 @@ func (req *MultipleResourceIds) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -105,7 +105,7 @@ func (req *MultipleTenantIds) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }

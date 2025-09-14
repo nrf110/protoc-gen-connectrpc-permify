@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// DeepNestingServiceName is the fully-qualified name of the DeepNestingService service.
@@ -43,8 +43,8 @@ const (
 
 // DeepNestingServiceClient is a client for the test.v1.DeepNestingService service.
 type DeepNestingServiceClient interface {
-	ProcessDeepNested(context.Context, *connect_go.Request[v1.DeepNestedRequest]) (*connect_go.Response[v1.Response], error)
-	ProcessVeryDeep(context.Context, *connect_go.Request[v1.VeryDeepResource]) (*connect_go.Response[v1.Response], error)
+	ProcessDeepNested(context.Context, *connect.Request[v1.DeepNestedRequest]) (*connect.Response[v1.Response], error)
+	ProcessVeryDeep(context.Context, *connect.Request[v1.VeryDeepResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewDeepNestingServiceClient constructs a client for the test.v1.DeepNestingService service. By
@@ -54,42 +54,45 @@ type DeepNestingServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewDeepNestingServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) DeepNestingServiceClient {
+func NewDeepNestingServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) DeepNestingServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	deepNestingServiceMethods := v1.File_test_v1_deep_nesting_proto.Services().ByName("DeepNestingService").Methods()
 	return &deepNestingServiceClient{
-		processDeepNested: connect_go.NewClient[v1.DeepNestedRequest, v1.Response](
+		processDeepNested: connect.NewClient[v1.DeepNestedRequest, v1.Response](
 			httpClient,
 			baseURL+DeepNestingServiceProcessDeepNestedProcedure,
-			opts...,
+			connect.WithSchema(deepNestingServiceMethods.ByName("ProcessDeepNested")),
+			connect.WithClientOptions(opts...),
 		),
-		processVeryDeep: connect_go.NewClient[v1.VeryDeepResource, v1.Response](
+		processVeryDeep: connect.NewClient[v1.VeryDeepResource, v1.Response](
 			httpClient,
 			baseURL+DeepNestingServiceProcessVeryDeepProcedure,
-			opts...,
+			connect.WithSchema(deepNestingServiceMethods.ByName("ProcessVeryDeep")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // deepNestingServiceClient implements DeepNestingServiceClient.
 type deepNestingServiceClient struct {
-	processDeepNested *connect_go.Client[v1.DeepNestedRequest, v1.Response]
-	processVeryDeep   *connect_go.Client[v1.VeryDeepResource, v1.Response]
+	processDeepNested *connect.Client[v1.DeepNestedRequest, v1.Response]
+	processVeryDeep   *connect.Client[v1.VeryDeepResource, v1.Response]
 }
 
 // ProcessDeepNested calls test.v1.DeepNestingService.ProcessDeepNested.
-func (c *deepNestingServiceClient) ProcessDeepNested(ctx context.Context, req *connect_go.Request[v1.DeepNestedRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *deepNestingServiceClient) ProcessDeepNested(ctx context.Context, req *connect.Request[v1.DeepNestedRequest]) (*connect.Response[v1.Response], error) {
 	return c.processDeepNested.CallUnary(ctx, req)
 }
 
 // ProcessVeryDeep calls test.v1.DeepNestingService.ProcessVeryDeep.
-func (c *deepNestingServiceClient) ProcessVeryDeep(ctx context.Context, req *connect_go.Request[v1.VeryDeepResource]) (*connect_go.Response[v1.Response], error) {
+func (c *deepNestingServiceClient) ProcessVeryDeep(ctx context.Context, req *connect.Request[v1.VeryDeepResource]) (*connect.Response[v1.Response], error) {
 	return c.processVeryDeep.CallUnary(ctx, req)
 }
 
 // DeepNestingServiceHandler is an implementation of the test.v1.DeepNestingService service.
 type DeepNestingServiceHandler interface {
-	ProcessDeepNested(context.Context, *connect_go.Request[v1.DeepNestedRequest]) (*connect_go.Response[v1.Response], error)
-	ProcessVeryDeep(context.Context, *connect_go.Request[v1.VeryDeepResource]) (*connect_go.Response[v1.Response], error)
+	ProcessDeepNested(context.Context, *connect.Request[v1.DeepNestedRequest]) (*connect.Response[v1.Response], error)
+	ProcessVeryDeep(context.Context, *connect.Request[v1.VeryDeepResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewDeepNestingServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -97,16 +100,19 @@ type DeepNestingServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewDeepNestingServiceHandler(svc DeepNestingServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	deepNestingServiceProcessDeepNestedHandler := connect_go.NewUnaryHandler(
+func NewDeepNestingServiceHandler(svc DeepNestingServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	deepNestingServiceMethods := v1.File_test_v1_deep_nesting_proto.Services().ByName("DeepNestingService").Methods()
+	deepNestingServiceProcessDeepNestedHandler := connect.NewUnaryHandler(
 		DeepNestingServiceProcessDeepNestedProcedure,
 		svc.ProcessDeepNested,
-		opts...,
+		connect.WithSchema(deepNestingServiceMethods.ByName("ProcessDeepNested")),
+		connect.WithHandlerOptions(opts...),
 	)
-	deepNestingServiceProcessVeryDeepHandler := connect_go.NewUnaryHandler(
+	deepNestingServiceProcessVeryDeepHandler := connect.NewUnaryHandler(
 		DeepNestingServiceProcessVeryDeepProcedure,
 		svc.ProcessVeryDeep,
-		opts...,
+		connect.WithSchema(deepNestingServiceMethods.ByName("ProcessVeryDeep")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.DeepNestingService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -123,10 +129,10 @@ func NewDeepNestingServiceHandler(svc DeepNestingServiceHandler, opts ...connect
 // UnimplementedDeepNestingServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedDeepNestingServiceHandler struct{}
 
-func (UnimplementedDeepNestingServiceHandler) ProcessDeepNested(context.Context, *connect_go.Request[v1.DeepNestedRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.DeepNestingService.ProcessDeepNested is not implemented"))
+func (UnimplementedDeepNestingServiceHandler) ProcessDeepNested(context.Context, *connect.Request[v1.DeepNestedRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.DeepNestingService.ProcessDeepNested is not implemented"))
 }
 
-func (UnimplementedDeepNestingServiceHandler) ProcessVeryDeep(context.Context, *connect_go.Request[v1.VeryDeepResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.DeepNestingService.ProcessVeryDeep is not implemented"))
+func (UnimplementedDeepNestingServiceHandler) ProcessVeryDeep(context.Context, *connect.Request[v1.VeryDeepResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.DeepNestingService.ProcessVeryDeep is not implemented"))
 }

@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	permifyv1 "github.com/nrf110/connectrpc-permify/gen/nrf110/permify/v1"
@@ -27,7 +29,7 @@ func NewResource(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *prot
 }
 
 func (resource *Resource) Generate(nestingLevel int) {
-	resource.checksFromResources(resource.Path, nestingLevel, make(map[string]bool))
+	resource.checksFromResources(resource.Path, nestingLevel)
 }
 
 func findResourcePath(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *protogen.Message, path *PathBuilder) *Resource {
@@ -122,16 +124,16 @@ func findAttributes(plugin *protogen.Plugin, pb *protogen.Message, path *PathBui
 	return accum
 }
 
-func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel int) {
 	file := resource.file
 	if remainingPath.Child != nil {
 		if remainingPath.Child.Child != nil || resource.IdPath != nil || resource.TenantIdPath != nil {
-			varName := loopVar(usedLoopVars)
+			varName := util.VariableName()
 			file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, " {")
-			resource.checksFromResources(remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars)
+			resource.checksFromResources(remainingPath.Child.WithPrefix(varName), nestingLevel+1)
 		} else {
 			file.P(util.Indent(nestingLevel), "for range ", remainingPath.Path, " {")
-			resource.checksFromResources(remainingPath.Child, nestingLevel+1, usedLoopVars)
+			resource.checksFromResources(remainingPath.Child, nestingLevel+1)
 		}
 		file.P(util.Indent(nestingLevel), "}")
 	} else {
@@ -149,7 +151,7 @@ func (resource *Resource) checksFromResources(remainingPath *Path, nestingLevel 
 		if resource.TenantIdPath != nil {
 			resource.renderIdPath(resource.TenantIdPath, nestingLevel, "tenantId")
 		}
-		resource.renderAttributes(nestingLevel, usedLoopVars)
+		resource.renderAttributes(nestingLevel)
 		resource.renderCheck(nestingLevel, idPath)
 		file.P(util.Indent(nestingLevel), "checks = append(checks, check)")
 	}
@@ -183,27 +185,29 @@ func (resource *Resource) renderNilChecks(sb *strings.Builder, remainingPath *Pa
 	return sb.String()
 }
 
-func (resource *Resource) renderAttributes(nestingLevel int, usedLoopVars map[string]bool) {
+func (resource *Resource) renderAttributes(nestingLevel int) {
 	file := resource.file
 
 	file.P(util.Indent(nestingLevel), "attributes := make(map[string]any)")
-	for name, path := range resource.AttributePaths {
-		resource.renderAttribute(name, path, nestingLevel, usedLoopVars, false)
+	keys := maps.Keys(resource.AttributePaths)
+	sortedKeys := slices.Sorted(keys)
+	for _, name := range sortedKeys {
+		resource.renderAttribute(name, resource.AttributePaths[name], nestingLevel, false)
 	}
 }
 
-func (resource *Resource) renderAttribute(name string, remainingPath *Path, nestingLevel int, usedLoopVars map[string]bool, isNested bool) {
+func (resource *Resource) renderAttribute(name string, remainingPath *Path, nestingLevel int, isNested bool) {
 	file := resource.file
 
 	if remainingPath.Child != nil {
 		// We have a nested collection, need to collect values into a slice
-		varName := loopVar(usedLoopVars)
+		varName := util.VariableName()
 		if !isNested {
 			// First time entering a collection, initialize the slice
 			file.P(util.Indent(nestingLevel), "var ", name, "Values []any")
 		}
 		file.P(util.Indent(nestingLevel), "for _, ", varName, " := range ", remainingPath.Path, "{")
-		resource.renderAttribute(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, usedLoopVars, true)
+		resource.renderAttribute(name, remainingPath.Child.WithPrefix(varName), nestingLevel+1, true)
 		file.P(util.Indent(nestingLevel), "}")
 		if !isNested {
 			// After collecting all values, assign to attributes
@@ -234,14 +238,4 @@ func (resource *Resource) renderCheck(nestingLevel int, idPath string) {
 	file.P(util.Indent(nestingLevel+2), `Attributes: attributes,`)
 	file.P(util.Indent(nestingLevel+1), "},")
 	file.P(util.Indent(nestingLevel), "}")
-}
-
-func loopVar(inUse map[string]bool) string {
-	for {
-		name := util.VariableName()
-		if exists := inUse[name]; !exists {
-			inUse[name] = true
-			return name
-		}
-	}
 }

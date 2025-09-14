@@ -19,8 +19,8 @@ func (req *AttributesRequest) GetChecks() pkg.CheckConfig {
 	attributes := make(map[string]any)
 	attributes["complex"] = resource.Complex
 	var fooValues []any
-	for _, trk := range resource.Mapped {
-		fooValues = append(fooValues, trk.Bar)
+	for _, v1 := range resource.Mapped {
+		fooValues = append(fooValues, v1.Bar)
 	}
 	if len(fooValues) > 0 {
 		attributes["foo"] = fooValues
@@ -36,7 +36,7 @@ func (req *AttributesRequest) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }

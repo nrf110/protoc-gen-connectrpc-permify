@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// ErrorCaseServiceName is the fully-qualified name of the ErrorCaseService service.
@@ -50,13 +50,13 @@ const (
 // ErrorCaseServiceClient is a client for the test.v1.ErrorCaseService service.
 type ErrorCaseServiceClient interface {
 	// This should error - resource without resource_id
-	BadResource(context.Context, *connect_go.Request[v1.NoResourceId]) (*connect_go.Response[v1.Response], error)
+	BadResource(context.Context, *connect.Request[v1.NoResourceId]) (*connect.Response[v1.Response], error)
 	// This should work - valid case
-	ValidCase(context.Context, *connect_go.Request[v1.ValidResource]) (*connect_go.Response[v1.Response], error)
+	ValidCase(context.Context, *connect.Request[v1.ValidResource]) (*connect.Response[v1.Response], error)
 	// Edge case - multiple resource IDs
-	MultipleIds(context.Context, *connect_go.Request[v1.MultipleResourceIds]) (*connect_go.Response[v1.Response], error)
+	MultipleIds(context.Context, *connect.Request[v1.MultipleResourceIds]) (*connect.Response[v1.Response], error)
 	// Edge case - multiple tenant IDs
-	MultipleTenants(context.Context, *connect_go.Request[v1.MultipleTenantIds]) (*connect_go.Response[v1.Response], error)
+	MultipleTenants(context.Context, *connect.Request[v1.MultipleTenantIds]) (*connect.Response[v1.Response], error)
 }
 
 // NewErrorCaseServiceClient constructs a client for the test.v1.ErrorCaseService service. By
@@ -66,70 +66,75 @@ type ErrorCaseServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewErrorCaseServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ErrorCaseServiceClient {
+func NewErrorCaseServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ErrorCaseServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	errorCaseServiceMethods := v1.File_test_v1_error_cases_proto.Services().ByName("ErrorCaseService").Methods()
 	return &errorCaseServiceClient{
-		badResource: connect_go.NewClient[v1.NoResourceId, v1.Response](
+		badResource: connect.NewClient[v1.NoResourceId, v1.Response](
 			httpClient,
 			baseURL+ErrorCaseServiceBadResourceProcedure,
-			opts...,
+			connect.WithSchema(errorCaseServiceMethods.ByName("BadResource")),
+			connect.WithClientOptions(opts...),
 		),
-		validCase: connect_go.NewClient[v1.ValidResource, v1.Response](
+		validCase: connect.NewClient[v1.ValidResource, v1.Response](
 			httpClient,
 			baseURL+ErrorCaseServiceValidCaseProcedure,
-			opts...,
+			connect.WithSchema(errorCaseServiceMethods.ByName("ValidCase")),
+			connect.WithClientOptions(opts...),
 		),
-		multipleIds: connect_go.NewClient[v1.MultipleResourceIds, v1.Response](
+		multipleIds: connect.NewClient[v1.MultipleResourceIds, v1.Response](
 			httpClient,
 			baseURL+ErrorCaseServiceMultipleIdsProcedure,
-			opts...,
+			connect.WithSchema(errorCaseServiceMethods.ByName("MultipleIds")),
+			connect.WithClientOptions(opts...),
 		),
-		multipleTenants: connect_go.NewClient[v1.MultipleTenantIds, v1.Response](
+		multipleTenants: connect.NewClient[v1.MultipleTenantIds, v1.Response](
 			httpClient,
 			baseURL+ErrorCaseServiceMultipleTenantsProcedure,
-			opts...,
+			connect.WithSchema(errorCaseServiceMethods.ByName("MultipleTenants")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // errorCaseServiceClient implements ErrorCaseServiceClient.
 type errorCaseServiceClient struct {
-	badResource     *connect_go.Client[v1.NoResourceId, v1.Response]
-	validCase       *connect_go.Client[v1.ValidResource, v1.Response]
-	multipleIds     *connect_go.Client[v1.MultipleResourceIds, v1.Response]
-	multipleTenants *connect_go.Client[v1.MultipleTenantIds, v1.Response]
+	badResource     *connect.Client[v1.NoResourceId, v1.Response]
+	validCase       *connect.Client[v1.ValidResource, v1.Response]
+	multipleIds     *connect.Client[v1.MultipleResourceIds, v1.Response]
+	multipleTenants *connect.Client[v1.MultipleTenantIds, v1.Response]
 }
 
 // BadResource calls test.v1.ErrorCaseService.BadResource.
-func (c *errorCaseServiceClient) BadResource(ctx context.Context, req *connect_go.Request[v1.NoResourceId]) (*connect_go.Response[v1.Response], error) {
+func (c *errorCaseServiceClient) BadResource(ctx context.Context, req *connect.Request[v1.NoResourceId]) (*connect.Response[v1.Response], error) {
 	return c.badResource.CallUnary(ctx, req)
 }
 
 // ValidCase calls test.v1.ErrorCaseService.ValidCase.
-func (c *errorCaseServiceClient) ValidCase(ctx context.Context, req *connect_go.Request[v1.ValidResource]) (*connect_go.Response[v1.Response], error) {
+func (c *errorCaseServiceClient) ValidCase(ctx context.Context, req *connect.Request[v1.ValidResource]) (*connect.Response[v1.Response], error) {
 	return c.validCase.CallUnary(ctx, req)
 }
 
 // MultipleIds calls test.v1.ErrorCaseService.MultipleIds.
-func (c *errorCaseServiceClient) MultipleIds(ctx context.Context, req *connect_go.Request[v1.MultipleResourceIds]) (*connect_go.Response[v1.Response], error) {
+func (c *errorCaseServiceClient) MultipleIds(ctx context.Context, req *connect.Request[v1.MultipleResourceIds]) (*connect.Response[v1.Response], error) {
 	return c.multipleIds.CallUnary(ctx, req)
 }
 
 // MultipleTenants calls test.v1.ErrorCaseService.MultipleTenants.
-func (c *errorCaseServiceClient) MultipleTenants(ctx context.Context, req *connect_go.Request[v1.MultipleTenantIds]) (*connect_go.Response[v1.Response], error) {
+func (c *errorCaseServiceClient) MultipleTenants(ctx context.Context, req *connect.Request[v1.MultipleTenantIds]) (*connect.Response[v1.Response], error) {
 	return c.multipleTenants.CallUnary(ctx, req)
 }
 
 // ErrorCaseServiceHandler is an implementation of the test.v1.ErrorCaseService service.
 type ErrorCaseServiceHandler interface {
 	// This should error - resource without resource_id
-	BadResource(context.Context, *connect_go.Request[v1.NoResourceId]) (*connect_go.Response[v1.Response], error)
+	BadResource(context.Context, *connect.Request[v1.NoResourceId]) (*connect.Response[v1.Response], error)
 	// This should work - valid case
-	ValidCase(context.Context, *connect_go.Request[v1.ValidResource]) (*connect_go.Response[v1.Response], error)
+	ValidCase(context.Context, *connect.Request[v1.ValidResource]) (*connect.Response[v1.Response], error)
 	// Edge case - multiple resource IDs
-	MultipleIds(context.Context, *connect_go.Request[v1.MultipleResourceIds]) (*connect_go.Response[v1.Response], error)
+	MultipleIds(context.Context, *connect.Request[v1.MultipleResourceIds]) (*connect.Response[v1.Response], error)
 	// Edge case - multiple tenant IDs
-	MultipleTenants(context.Context, *connect_go.Request[v1.MultipleTenantIds]) (*connect_go.Response[v1.Response], error)
+	MultipleTenants(context.Context, *connect.Request[v1.MultipleTenantIds]) (*connect.Response[v1.Response], error)
 }
 
 // NewErrorCaseServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -137,26 +142,31 @@ type ErrorCaseServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewErrorCaseServiceHandler(svc ErrorCaseServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	errorCaseServiceBadResourceHandler := connect_go.NewUnaryHandler(
+func NewErrorCaseServiceHandler(svc ErrorCaseServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	errorCaseServiceMethods := v1.File_test_v1_error_cases_proto.Services().ByName("ErrorCaseService").Methods()
+	errorCaseServiceBadResourceHandler := connect.NewUnaryHandler(
 		ErrorCaseServiceBadResourceProcedure,
 		svc.BadResource,
-		opts...,
+		connect.WithSchema(errorCaseServiceMethods.ByName("BadResource")),
+		connect.WithHandlerOptions(opts...),
 	)
-	errorCaseServiceValidCaseHandler := connect_go.NewUnaryHandler(
+	errorCaseServiceValidCaseHandler := connect.NewUnaryHandler(
 		ErrorCaseServiceValidCaseProcedure,
 		svc.ValidCase,
-		opts...,
+		connect.WithSchema(errorCaseServiceMethods.ByName("ValidCase")),
+		connect.WithHandlerOptions(opts...),
 	)
-	errorCaseServiceMultipleIdsHandler := connect_go.NewUnaryHandler(
+	errorCaseServiceMultipleIdsHandler := connect.NewUnaryHandler(
 		ErrorCaseServiceMultipleIdsProcedure,
 		svc.MultipleIds,
-		opts...,
+		connect.WithSchema(errorCaseServiceMethods.ByName("MultipleIds")),
+		connect.WithHandlerOptions(opts...),
 	)
-	errorCaseServiceMultipleTenantsHandler := connect_go.NewUnaryHandler(
+	errorCaseServiceMultipleTenantsHandler := connect.NewUnaryHandler(
 		ErrorCaseServiceMultipleTenantsProcedure,
 		svc.MultipleTenants,
-		opts...,
+		connect.WithSchema(errorCaseServiceMethods.ByName("MultipleTenants")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.ErrorCaseService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -177,18 +187,18 @@ func NewErrorCaseServiceHandler(svc ErrorCaseServiceHandler, opts ...connect_go.
 // UnimplementedErrorCaseServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedErrorCaseServiceHandler struct{}
 
-func (UnimplementedErrorCaseServiceHandler) BadResource(context.Context, *connect_go.Request[v1.NoResourceId]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.BadResource is not implemented"))
+func (UnimplementedErrorCaseServiceHandler) BadResource(context.Context, *connect.Request[v1.NoResourceId]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.BadResource is not implemented"))
 }
 
-func (UnimplementedErrorCaseServiceHandler) ValidCase(context.Context, *connect_go.Request[v1.ValidResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.ValidCase is not implemented"))
+func (UnimplementedErrorCaseServiceHandler) ValidCase(context.Context, *connect.Request[v1.ValidResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.ValidCase is not implemented"))
 }
 
-func (UnimplementedErrorCaseServiceHandler) MultipleIds(context.Context, *connect_go.Request[v1.MultipleResourceIds]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.MultipleIds is not implemented"))
+func (UnimplementedErrorCaseServiceHandler) MultipleIds(context.Context, *connect.Request[v1.MultipleResourceIds]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.MultipleIds is not implemented"))
 }
 
-func (UnimplementedErrorCaseServiceHandler) MultipleTenants(context.Context, *connect_go.Request[v1.MultipleTenantIds]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.MultipleTenants is not implemented"))
+func (UnimplementedErrorCaseServiceHandler) MultipleTenants(context.Context, *connect.Request[v1.MultipleTenantIds]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.ErrorCaseService.MultipleTenants is not implemented"))
 }

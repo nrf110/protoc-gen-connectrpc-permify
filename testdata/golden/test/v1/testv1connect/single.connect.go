@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// SingleName is the fully-qualified name of the Single service.
@@ -43,9 +43,9 @@ const (
 
 // SingleClient is a client for the test.v1.Single service.
 type SingleClient interface {
-	Flat(context.Context, *connect_go.Request[v1.ResourceRequest]) (*connect_go.Response[v1.Response], error)
-	FlatWithId(context.Context, *connect_go.Request[v1.ResourceWithIdRequest]) (*connect_go.Response[v1.Response], error)
-	Nested(context.Context, *connect_go.Request[v1.NestedResourceRequest]) (*connect_go.Response[v1.Response], error)
+	Flat(context.Context, *connect.Request[v1.ResourceRequest]) (*connect.Response[v1.Response], error)
+	FlatWithId(context.Context, *connect.Request[v1.ResourceWithIdRequest]) (*connect.Response[v1.Response], error)
+	Nested(context.Context, *connect.Request[v1.NestedResourceRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewSingleClient constructs a client for the test.v1.Single service. By default, it uses the
@@ -55,54 +55,58 @@ type SingleClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewSingleClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) SingleClient {
+func NewSingleClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) SingleClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	singleMethods := v1.File_test_v1_single_proto.Services().ByName("Single").Methods()
 	return &singleClient{
-		flat: connect_go.NewClient[v1.ResourceRequest, v1.Response](
+		flat: connect.NewClient[v1.ResourceRequest, v1.Response](
 			httpClient,
 			baseURL+SingleFlatProcedure,
-			opts...,
+			connect.WithSchema(singleMethods.ByName("Flat")),
+			connect.WithClientOptions(opts...),
 		),
-		flatWithId: connect_go.NewClient[v1.ResourceWithIdRequest, v1.Response](
+		flatWithId: connect.NewClient[v1.ResourceWithIdRequest, v1.Response](
 			httpClient,
 			baseURL+SingleFlatWithIdProcedure,
-			opts...,
+			connect.WithSchema(singleMethods.ByName("FlatWithId")),
+			connect.WithClientOptions(opts...),
 		),
-		nested: connect_go.NewClient[v1.NestedResourceRequest, v1.Response](
+		nested: connect.NewClient[v1.NestedResourceRequest, v1.Response](
 			httpClient,
 			baseURL+SingleNestedProcedure,
-			opts...,
+			connect.WithSchema(singleMethods.ByName("Nested")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // singleClient implements SingleClient.
 type singleClient struct {
-	flat       *connect_go.Client[v1.ResourceRequest, v1.Response]
-	flatWithId *connect_go.Client[v1.ResourceWithIdRequest, v1.Response]
-	nested     *connect_go.Client[v1.NestedResourceRequest, v1.Response]
+	flat       *connect.Client[v1.ResourceRequest, v1.Response]
+	flatWithId *connect.Client[v1.ResourceWithIdRequest, v1.Response]
+	nested     *connect.Client[v1.NestedResourceRequest, v1.Response]
 }
 
 // Flat calls test.v1.Single.Flat.
-func (c *singleClient) Flat(ctx context.Context, req *connect_go.Request[v1.ResourceRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *singleClient) Flat(ctx context.Context, req *connect.Request[v1.ResourceRequest]) (*connect.Response[v1.Response], error) {
 	return c.flat.CallUnary(ctx, req)
 }
 
 // FlatWithId calls test.v1.Single.FlatWithId.
-func (c *singleClient) FlatWithId(ctx context.Context, req *connect_go.Request[v1.ResourceWithIdRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *singleClient) FlatWithId(ctx context.Context, req *connect.Request[v1.ResourceWithIdRequest]) (*connect.Response[v1.Response], error) {
 	return c.flatWithId.CallUnary(ctx, req)
 }
 
 // Nested calls test.v1.Single.Nested.
-func (c *singleClient) Nested(ctx context.Context, req *connect_go.Request[v1.NestedResourceRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *singleClient) Nested(ctx context.Context, req *connect.Request[v1.NestedResourceRequest]) (*connect.Response[v1.Response], error) {
 	return c.nested.CallUnary(ctx, req)
 }
 
 // SingleHandler is an implementation of the test.v1.Single service.
 type SingleHandler interface {
-	Flat(context.Context, *connect_go.Request[v1.ResourceRequest]) (*connect_go.Response[v1.Response], error)
-	FlatWithId(context.Context, *connect_go.Request[v1.ResourceWithIdRequest]) (*connect_go.Response[v1.Response], error)
-	Nested(context.Context, *connect_go.Request[v1.NestedResourceRequest]) (*connect_go.Response[v1.Response], error)
+	Flat(context.Context, *connect.Request[v1.ResourceRequest]) (*connect.Response[v1.Response], error)
+	FlatWithId(context.Context, *connect.Request[v1.ResourceWithIdRequest]) (*connect.Response[v1.Response], error)
+	Nested(context.Context, *connect.Request[v1.NestedResourceRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewSingleHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -110,21 +114,25 @@ type SingleHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewSingleHandler(svc SingleHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	singleFlatHandler := connect_go.NewUnaryHandler(
+func NewSingleHandler(svc SingleHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	singleMethods := v1.File_test_v1_single_proto.Services().ByName("Single").Methods()
+	singleFlatHandler := connect.NewUnaryHandler(
 		SingleFlatProcedure,
 		svc.Flat,
-		opts...,
+		connect.WithSchema(singleMethods.ByName("Flat")),
+		connect.WithHandlerOptions(opts...),
 	)
-	singleFlatWithIdHandler := connect_go.NewUnaryHandler(
+	singleFlatWithIdHandler := connect.NewUnaryHandler(
 		SingleFlatWithIdProcedure,
 		svc.FlatWithId,
-		opts...,
+		connect.WithSchema(singleMethods.ByName("FlatWithId")),
+		connect.WithHandlerOptions(opts...),
 	)
-	singleNestedHandler := connect_go.NewUnaryHandler(
+	singleNestedHandler := connect.NewUnaryHandler(
 		SingleNestedProcedure,
 		svc.Nested,
-		opts...,
+		connect.WithSchema(singleMethods.ByName("Nested")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.Single/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -143,14 +151,14 @@ func NewSingleHandler(svc SingleHandler, opts ...connect_go.HandlerOption) (stri
 // UnimplementedSingleHandler returns CodeUnimplemented from all methods.
 type UnimplementedSingleHandler struct{}
 
-func (UnimplementedSingleHandler) Flat(context.Context, *connect_go.Request[v1.ResourceRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.Single.Flat is not implemented"))
+func (UnimplementedSingleHandler) Flat(context.Context, *connect.Request[v1.ResourceRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.Single.Flat is not implemented"))
 }
 
-func (UnimplementedSingleHandler) FlatWithId(context.Context, *connect_go.Request[v1.ResourceWithIdRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.Single.FlatWithId is not implemented"))
+func (UnimplementedSingleHandler) FlatWithId(context.Context, *connect.Request[v1.ResourceWithIdRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.Single.FlatWithId is not implemented"))
 }
 
-func (UnimplementedSingleHandler) Nested(context.Context, *connect_go.Request[v1.NestedResourceRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.Single.Nested is not implemented"))
+func (UnimplementedSingleHandler) Nested(context.Context, *connect.Request[v1.NestedResourceRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.Single.Nested is not implemented"))
 }

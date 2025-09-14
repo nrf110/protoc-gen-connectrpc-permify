@@ -1,34 +1,21 @@
 package util
 
 import (
-	"math/rand"
-	"strings"
-	"time"
+	"fmt"
+	"sync/atomic"
 )
 
-const characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+// Global counter for deterministic variable name generation
+var variableCounter atomic.Uint64
 
-var letters = characters[0:26]
-
-var seededRand *rand.Rand = rand.New(
-	rand.NewSource(time.Now().UnixNano()))
-
-func byteWithCharset(charset string) byte {
-	return charset[seededRand.Intn(len(charset))]
+// ResetVariableCounter resets the counter - useful for tests or when starting a new file
+func ResetVariableCounter() {
+	variableCounter.Store(0)
 }
 
-func stringWithCharset(length int, charset string) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
-}
-
+// VariableName generates a deterministic variable name using a counter
+// The names follow the pattern: v1, v2, v3, etc.
 func VariableName() string {
-	var sb strings.Builder
-	length := seededRand.Intn(12)
-	sb.WriteByte(byteWithCharset(letters))
-	sb.WriteString(stringWithCharset(length, characters))
-	return sb.String()
+	counter := variableCounter.Add(1)
+	return fmt.Sprintf("v%d", counter)
 }

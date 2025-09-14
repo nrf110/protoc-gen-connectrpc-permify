@@ -6,14 +6,14 @@ import (
 
 func (req *EmptyRequest) GetChecks() pkg.CheckConfig {
 	return pkg.CheckConfig{
-		Type:   pkg.PUBLIC,
-		Checks: []pkg.Check{},
+		IsPublic: true,
+		Checks:   []pkg.Check{},
 	}
 }
 
 func (req *MinimalResource) GetChecks() pkg.CheckConfig {
 	return pkg.CheckConfig{
-		Type:   pkg.PUBLIC,
-		Checks: []pkg.Check{},
+		IsPublic: true,
+		Checks:   []pkg.Check{},
 	}
 }

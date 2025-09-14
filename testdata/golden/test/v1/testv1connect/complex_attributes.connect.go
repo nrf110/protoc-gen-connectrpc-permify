@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AttributeServiceName is the fully-qualified name of the AttributeService service.
@@ -40,7 +40,7 @@ const (
 
 // AttributeServiceClient is a client for the test.v1.AttributeService service.
 type AttributeServiceClient interface {
-	ProcessDocument(context.Context, *connect_go.Request[v1.ComplexResource]) (*connect_go.Response[v1.Response], error)
+	ProcessDocument(context.Context, *connect.Request[v1.ComplexResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewAttributeServiceClient constructs a client for the test.v1.AttributeService service. By
@@ -50,30 +50,32 @@ type AttributeServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAttributeServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AttributeServiceClient {
+func NewAttributeServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AttributeServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	attributeServiceMethods := v1.File_test_v1_complex_attributes_proto.Services().ByName("AttributeService").Methods()
 	return &attributeServiceClient{
-		processDocument: connect_go.NewClient[v1.ComplexResource, v1.Response](
+		processDocument: connect.NewClient[v1.ComplexResource, v1.Response](
 			httpClient,
 			baseURL+AttributeServiceProcessDocumentProcedure,
-			opts...,
+			connect.WithSchema(attributeServiceMethods.ByName("ProcessDocument")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // attributeServiceClient implements AttributeServiceClient.
 type attributeServiceClient struct {
-	processDocument *connect_go.Client[v1.ComplexResource, v1.Response]
+	processDocument *connect.Client[v1.ComplexResource, v1.Response]
 }
 
 // ProcessDocument calls test.v1.AttributeService.ProcessDocument.
-func (c *attributeServiceClient) ProcessDocument(ctx context.Context, req *connect_go.Request[v1.ComplexResource]) (*connect_go.Response[v1.Response], error) {
+func (c *attributeServiceClient) ProcessDocument(ctx context.Context, req *connect.Request[v1.ComplexResource]) (*connect.Response[v1.Response], error) {
 	return c.processDocument.CallUnary(ctx, req)
 }
 
 // AttributeServiceHandler is an implementation of the test.v1.AttributeService service.
 type AttributeServiceHandler interface {
-	ProcessDocument(context.Context, *connect_go.Request[v1.ComplexResource]) (*connect_go.Response[v1.Response], error)
+	ProcessDocument(context.Context, *connect.Request[v1.ComplexResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewAttributeServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -81,11 +83,13 @@ type AttributeServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAttributeServiceHandler(svc AttributeServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	attributeServiceProcessDocumentHandler := connect_go.NewUnaryHandler(
+func NewAttributeServiceHandler(svc AttributeServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	attributeServiceMethods := v1.File_test_v1_complex_attributes_proto.Services().ByName("AttributeService").Methods()
+	attributeServiceProcessDocumentHandler := connect.NewUnaryHandler(
 		AttributeServiceProcessDocumentProcedure,
 		svc.ProcessDocument,
-		opts...,
+		connect.WithSchema(attributeServiceMethods.ByName("ProcessDocument")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.AttributeService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -100,6 +104,6 @@ func NewAttributeServiceHandler(svc AttributeServiceHandler, opts ...connect_go.
 // UnimplementedAttributeServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedAttributeServiceHandler struct{}
 
-func (UnimplementedAttributeServiceHandler) ProcessDocument(context.Context, *connect_go.Request[v1.ComplexResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.AttributeService.ProcessDocument is not implemented"))
+func (UnimplementedAttributeServiceHandler) ProcessDocument(context.Context, *connect.Request[v1.ComplexResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.AttributeService.ProcessDocument is not implemented"))
 }

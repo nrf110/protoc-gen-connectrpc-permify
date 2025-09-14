@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// UserServiceName is the fully-qualified name of the UserService service.
@@ -39,7 +39,7 @@ const (
 
 // UserServiceClient is a client for the test.v1.UserService service.
 type UserServiceClient interface {
-	UpdateUser(context.Context, *connect_go.Request[v1.UpdateUserRequest]) (*connect_go.Response[v1.Response], error)
+	UpdateUser(context.Context, *connect.Request[v1.UpdateUserRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewUserServiceClient constructs a client for the test.v1.UserService service. By default, it uses
@@ -49,30 +49,32 @@ type UserServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewUserServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserServiceClient {
+func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) UserServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	userServiceMethods := v1.File_test_v1_single_resource_proto.Services().ByName("UserService").Methods()
 	return &userServiceClient{
-		updateUser: connect_go.NewClient[v1.UpdateUserRequest, v1.Response](
+		updateUser: connect.NewClient[v1.UpdateUserRequest, v1.Response](
 			httpClient,
 			baseURL+UserServiceUpdateUserProcedure,
-			opts...,
+			connect.WithSchema(userServiceMethods.ByName("UpdateUser")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
-	updateUser *connect_go.Client[v1.UpdateUserRequest, v1.Response]
+	updateUser *connect.Client[v1.UpdateUserRequest, v1.Response]
 }
 
 // UpdateUser calls test.v1.UserService.UpdateUser.
-func (c *userServiceClient) UpdateUser(ctx context.Context, req *connect_go.Request[v1.UpdateUserRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *userServiceClient) UpdateUser(ctx context.Context, req *connect.Request[v1.UpdateUserRequest]) (*connect.Response[v1.Response], error) {
 	return c.updateUser.CallUnary(ctx, req)
 }
 
 // UserServiceHandler is an implementation of the test.v1.UserService service.
 type UserServiceHandler interface {
-	UpdateUser(context.Context, *connect_go.Request[v1.UpdateUserRequest]) (*connect_go.Response[v1.Response], error)
+	UpdateUser(context.Context, *connect.Request[v1.UpdateUserRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -80,11 +82,13 @@ type UserServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewUserServiceHandler(svc UserServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	userServiceUpdateUserHandler := connect_go.NewUnaryHandler(
+func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	userServiceMethods := v1.File_test_v1_single_resource_proto.Services().ByName("UserService").Methods()
+	userServiceUpdateUserHandler := connect.NewUnaryHandler(
 		UserServiceUpdateUserProcedure,
 		svc.UpdateUser,
-		opts...,
+		connect.WithSchema(userServiceMethods.ByName("UpdateUser")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -99,6 +103,6 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect_go.HandlerOpt
 // UnimplementedUserServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserServiceHandler struct{}
 
-func (UnimplementedUserServiceHandler) UpdateUser(context.Context, *connect_go.Request[v1.UpdateUserRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.UserService.UpdateUser is not implemented"))
+func (UnimplementedUserServiceHandler) UpdateUser(context.Context, *connect.Request[v1.UpdateUserRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.UserService.UpdateUser is not implemented"))
 }

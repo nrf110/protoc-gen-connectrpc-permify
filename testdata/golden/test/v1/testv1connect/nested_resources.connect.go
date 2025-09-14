@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// NestedServiceName is the fully-qualified name of the NestedService service.
@@ -40,7 +40,7 @@ const (
 
 // NestedServiceClient is a client for the test.v1.NestedService service.
 type NestedServiceClient interface {
-	ProcessNested(context.Context, *connect_go.Request[v1.NestedRequest]) (*connect_go.Response[v1.Response], error)
+	ProcessNested(context.Context, *connect.Request[v1.NestedRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewNestedServiceClient constructs a client for the test.v1.NestedService service. By default, it
@@ -50,30 +50,32 @@ type NestedServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewNestedServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) NestedServiceClient {
+func NewNestedServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) NestedServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	nestedServiceMethods := v1.File_test_v1_nested_resources_proto.Services().ByName("NestedService").Methods()
 	return &nestedServiceClient{
-		processNested: connect_go.NewClient[v1.NestedRequest, v1.Response](
+		processNested: connect.NewClient[v1.NestedRequest, v1.Response](
 			httpClient,
 			baseURL+NestedServiceProcessNestedProcedure,
-			opts...,
+			connect.WithSchema(nestedServiceMethods.ByName("ProcessNested")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // nestedServiceClient implements NestedServiceClient.
 type nestedServiceClient struct {
-	processNested *connect_go.Client[v1.NestedRequest, v1.Response]
+	processNested *connect.Client[v1.NestedRequest, v1.Response]
 }
 
 // ProcessNested calls test.v1.NestedService.ProcessNested.
-func (c *nestedServiceClient) ProcessNested(ctx context.Context, req *connect_go.Request[v1.NestedRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *nestedServiceClient) ProcessNested(ctx context.Context, req *connect.Request[v1.NestedRequest]) (*connect.Response[v1.Response], error) {
 	return c.processNested.CallUnary(ctx, req)
 }
 
 // NestedServiceHandler is an implementation of the test.v1.NestedService service.
 type NestedServiceHandler interface {
-	ProcessNested(context.Context, *connect_go.Request[v1.NestedRequest]) (*connect_go.Response[v1.Response], error)
+	ProcessNested(context.Context, *connect.Request[v1.NestedRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewNestedServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -81,11 +83,13 @@ type NestedServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewNestedServiceHandler(svc NestedServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	nestedServiceProcessNestedHandler := connect_go.NewUnaryHandler(
+func NewNestedServiceHandler(svc NestedServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	nestedServiceMethods := v1.File_test_v1_nested_resources_proto.Services().ByName("NestedService").Methods()
+	nestedServiceProcessNestedHandler := connect.NewUnaryHandler(
 		NestedServiceProcessNestedProcedure,
 		svc.ProcessNested,
-		opts...,
+		connect.WithSchema(nestedServiceMethods.ByName("ProcessNested")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.NestedService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -100,6 +104,6 @@ func NewNestedServiceHandler(svc NestedServiceHandler, opts ...connect_go.Handle
 // UnimplementedNestedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedNestedServiceHandler struct{}
 
-func (UnimplementedNestedServiceHandler) ProcessNested(context.Context, *connect_go.Request[v1.NestedRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.NestedService.ProcessNested is not implemented"))
+func (UnimplementedNestedServiceHandler) ProcessNested(context.Context, *connect.Request[v1.NestedRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.NestedService.ProcessNested is not implemented"))
 }

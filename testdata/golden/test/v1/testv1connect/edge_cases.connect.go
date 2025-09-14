@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// EmptyServiceName is the fully-qualified name of the EmptyService service.
@@ -54,8 +54,7 @@ type EmptyServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewEmptyServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) EmptyServiceClient {
-	baseURL = strings.TrimRight(baseURL, "/")
+func NewEmptyServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) EmptyServiceClient {
 	return &emptyServiceClient{}
 }
 
@@ -72,7 +71,7 @@ type EmptyServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewEmptyServiceHandler(svc EmptyServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+func NewEmptyServiceHandler(svc EmptyServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	return "/test.v1.EmptyService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		default:
@@ -86,8 +85,8 @@ type UnimplementedEmptyServiceHandler struct{}
 
 // AllPublicServiceClient is a client for the test.v1.AllPublicService service.
 type AllPublicServiceClient interface {
-	PublicMethod1(context.Context, *connect_go.Request[v1.EmptyRequest]) (*connect_go.Response[v1.Response], error)
-	PublicMethod2(context.Context, *connect_go.Request[v1.MinimalResource]) (*connect_go.Response[v1.Response], error)
+	PublicMethod1(context.Context, *connect.Request[v1.EmptyRequest]) (*connect.Response[v1.Response], error)
+	PublicMethod2(context.Context, *connect.Request[v1.MinimalResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewAllPublicServiceClient constructs a client for the test.v1.AllPublicService service. By
@@ -97,42 +96,45 @@ type AllPublicServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAllPublicServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AllPublicServiceClient {
+func NewAllPublicServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AllPublicServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	allPublicServiceMethods := v1.File_test_v1_edge_cases_proto.Services().ByName("AllPublicService").Methods()
 	return &allPublicServiceClient{
-		publicMethod1: connect_go.NewClient[v1.EmptyRequest, v1.Response](
+		publicMethod1: connect.NewClient[v1.EmptyRequest, v1.Response](
 			httpClient,
 			baseURL+AllPublicServicePublicMethod1Procedure,
-			opts...,
+			connect.WithSchema(allPublicServiceMethods.ByName("PublicMethod1")),
+			connect.WithClientOptions(opts...),
 		),
-		publicMethod2: connect_go.NewClient[v1.MinimalResource, v1.Response](
+		publicMethod2: connect.NewClient[v1.MinimalResource, v1.Response](
 			httpClient,
 			baseURL+AllPublicServicePublicMethod2Procedure,
-			opts...,
+			connect.WithSchema(allPublicServiceMethods.ByName("PublicMethod2")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // allPublicServiceClient implements AllPublicServiceClient.
 type allPublicServiceClient struct {
-	publicMethod1 *connect_go.Client[v1.EmptyRequest, v1.Response]
-	publicMethod2 *connect_go.Client[v1.MinimalResource, v1.Response]
+	publicMethod1 *connect.Client[v1.EmptyRequest, v1.Response]
+	publicMethod2 *connect.Client[v1.MinimalResource, v1.Response]
 }
 
 // PublicMethod1 calls test.v1.AllPublicService.PublicMethod1.
-func (c *allPublicServiceClient) PublicMethod1(ctx context.Context, req *connect_go.Request[v1.EmptyRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *allPublicServiceClient) PublicMethod1(ctx context.Context, req *connect.Request[v1.EmptyRequest]) (*connect.Response[v1.Response], error) {
 	return c.publicMethod1.CallUnary(ctx, req)
 }
 
 // PublicMethod2 calls test.v1.AllPublicService.PublicMethod2.
-func (c *allPublicServiceClient) PublicMethod2(ctx context.Context, req *connect_go.Request[v1.MinimalResource]) (*connect_go.Response[v1.Response], error) {
+func (c *allPublicServiceClient) PublicMethod2(ctx context.Context, req *connect.Request[v1.MinimalResource]) (*connect.Response[v1.Response], error) {
 	return c.publicMethod2.CallUnary(ctx, req)
 }
 
 // AllPublicServiceHandler is an implementation of the test.v1.AllPublicService service.
 type AllPublicServiceHandler interface {
-	PublicMethod1(context.Context, *connect_go.Request[v1.EmptyRequest]) (*connect_go.Response[v1.Response], error)
-	PublicMethod2(context.Context, *connect_go.Request[v1.MinimalResource]) (*connect_go.Response[v1.Response], error)
+	PublicMethod1(context.Context, *connect.Request[v1.EmptyRequest]) (*connect.Response[v1.Response], error)
+	PublicMethod2(context.Context, *connect.Request[v1.MinimalResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewAllPublicServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -140,16 +142,19 @@ type AllPublicServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAllPublicServiceHandler(svc AllPublicServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	allPublicServicePublicMethod1Handler := connect_go.NewUnaryHandler(
+func NewAllPublicServiceHandler(svc AllPublicServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	allPublicServiceMethods := v1.File_test_v1_edge_cases_proto.Services().ByName("AllPublicService").Methods()
+	allPublicServicePublicMethod1Handler := connect.NewUnaryHandler(
 		AllPublicServicePublicMethod1Procedure,
 		svc.PublicMethod1,
-		opts...,
+		connect.WithSchema(allPublicServiceMethods.ByName("PublicMethod1")),
+		connect.WithHandlerOptions(opts...),
 	)
-	allPublicServicePublicMethod2Handler := connect_go.NewUnaryHandler(
+	allPublicServicePublicMethod2Handler := connect.NewUnaryHandler(
 		AllPublicServicePublicMethod2Procedure,
 		svc.PublicMethod2,
-		opts...,
+		connect.WithSchema(allPublicServiceMethods.ByName("PublicMethod2")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.AllPublicService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -166,10 +171,10 @@ func NewAllPublicServiceHandler(svc AllPublicServiceHandler, opts ...connect_go.
 // UnimplementedAllPublicServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedAllPublicServiceHandler struct{}
 
-func (UnimplementedAllPublicServiceHandler) PublicMethod1(context.Context, *connect_go.Request[v1.EmptyRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.AllPublicService.PublicMethod1 is not implemented"))
+func (UnimplementedAllPublicServiceHandler) PublicMethod1(context.Context, *connect.Request[v1.EmptyRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.AllPublicService.PublicMethod1 is not implemented"))
 }
 
-func (UnimplementedAllPublicServiceHandler) PublicMethod2(context.Context, *connect_go.Request[v1.MinimalResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.AllPublicService.PublicMethod2 is not implemented"))
+func (UnimplementedAllPublicServiceHandler) PublicMethod2(context.Context, *connect.Request[v1.MinimalResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.AllPublicService.PublicMethod2 is not implemented"))
 }

@@ -28,15 +28,15 @@ func (req *Account) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
 func (req *PublicInfo) GetChecks() pkg.CheckConfig {
 	return pkg.CheckConfig{
-		Type:   pkg.PUBLIC,
-		Checks: []pkg.Check{},
+		IsPublic: true,
+		Checks:   []pkg.Check{},
 	}
 }
 
@@ -61,8 +61,8 @@ func (req *Profile) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -87,7 +87,7 @@ func (req *Settings) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }

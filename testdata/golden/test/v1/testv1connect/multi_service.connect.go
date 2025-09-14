@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AccountServiceName is the fully-qualified name of the AccountService service.
@@ -53,8 +53,8 @@ const (
 
 // AccountServiceClient is a client for the test.v1.AccountService service.
 type AccountServiceClient interface {
-	GetAccount(context.Context, *connect_go.Request[v1.Account]) (*connect_go.Response[v1.Response], error)
-	GetPublicAccountInfo(context.Context, *connect_go.Request[v1.PublicInfo]) (*connect_go.Response[v1.Response], error)
+	GetAccount(context.Context, *connect.Request[v1.Account]) (*connect.Response[v1.Response], error)
+	GetPublicAccountInfo(context.Context, *connect.Request[v1.PublicInfo]) (*connect.Response[v1.Response], error)
 }
 
 // NewAccountServiceClient constructs a client for the test.v1.AccountService service. By default,
@@ -64,42 +64,45 @@ type AccountServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAccountServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AccountServiceClient {
+func NewAccountServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AccountServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	accountServiceMethods := v1.File_test_v1_multi_service_proto.Services().ByName("AccountService").Methods()
 	return &accountServiceClient{
-		getAccount: connect_go.NewClient[v1.Account, v1.Response](
+		getAccount: connect.NewClient[v1.Account, v1.Response](
 			httpClient,
 			baseURL+AccountServiceGetAccountProcedure,
-			opts...,
+			connect.WithSchema(accountServiceMethods.ByName("GetAccount")),
+			connect.WithClientOptions(opts...),
 		),
-		getPublicAccountInfo: connect_go.NewClient[v1.PublicInfo, v1.Response](
+		getPublicAccountInfo: connect.NewClient[v1.PublicInfo, v1.Response](
 			httpClient,
 			baseURL+AccountServiceGetPublicAccountInfoProcedure,
-			opts...,
+			connect.WithSchema(accountServiceMethods.ByName("GetPublicAccountInfo")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // accountServiceClient implements AccountServiceClient.
 type accountServiceClient struct {
-	getAccount           *connect_go.Client[v1.Account, v1.Response]
-	getPublicAccountInfo *connect_go.Client[v1.PublicInfo, v1.Response]
+	getAccount           *connect.Client[v1.Account, v1.Response]
+	getPublicAccountInfo *connect.Client[v1.PublicInfo, v1.Response]
 }
 
 // GetAccount calls test.v1.AccountService.GetAccount.
-func (c *accountServiceClient) GetAccount(ctx context.Context, req *connect_go.Request[v1.Account]) (*connect_go.Response[v1.Response], error) {
+func (c *accountServiceClient) GetAccount(ctx context.Context, req *connect.Request[v1.Account]) (*connect.Response[v1.Response], error) {
 	return c.getAccount.CallUnary(ctx, req)
 }
 
 // GetPublicAccountInfo calls test.v1.AccountService.GetPublicAccountInfo.
-func (c *accountServiceClient) GetPublicAccountInfo(ctx context.Context, req *connect_go.Request[v1.PublicInfo]) (*connect_go.Response[v1.Response], error) {
+func (c *accountServiceClient) GetPublicAccountInfo(ctx context.Context, req *connect.Request[v1.PublicInfo]) (*connect.Response[v1.Response], error) {
 	return c.getPublicAccountInfo.CallUnary(ctx, req)
 }
 
 // AccountServiceHandler is an implementation of the test.v1.AccountService service.
 type AccountServiceHandler interface {
-	GetAccount(context.Context, *connect_go.Request[v1.Account]) (*connect_go.Response[v1.Response], error)
-	GetPublicAccountInfo(context.Context, *connect_go.Request[v1.PublicInfo]) (*connect_go.Response[v1.Response], error)
+	GetAccount(context.Context, *connect.Request[v1.Account]) (*connect.Response[v1.Response], error)
+	GetPublicAccountInfo(context.Context, *connect.Request[v1.PublicInfo]) (*connect.Response[v1.Response], error)
 }
 
 // NewAccountServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -107,16 +110,19 @@ type AccountServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	accountServiceGetAccountHandler := connect_go.NewUnaryHandler(
+func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	accountServiceMethods := v1.File_test_v1_multi_service_proto.Services().ByName("AccountService").Methods()
+	accountServiceGetAccountHandler := connect.NewUnaryHandler(
 		AccountServiceGetAccountProcedure,
 		svc.GetAccount,
-		opts...,
+		connect.WithSchema(accountServiceMethods.ByName("GetAccount")),
+		connect.WithHandlerOptions(opts...),
 	)
-	accountServiceGetPublicAccountInfoHandler := connect_go.NewUnaryHandler(
+	accountServiceGetPublicAccountInfoHandler := connect.NewUnaryHandler(
 		AccountServiceGetPublicAccountInfoProcedure,
 		svc.GetPublicAccountInfo,
-		opts...,
+		connect.WithSchema(accountServiceMethods.ByName("GetPublicAccountInfo")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.AccountService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -133,17 +139,17 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect_go.Hand
 // UnimplementedAccountServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedAccountServiceHandler struct{}
 
-func (UnimplementedAccountServiceHandler) GetAccount(context.Context, *connect_go.Request[v1.Account]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.AccountService.GetAccount is not implemented"))
+func (UnimplementedAccountServiceHandler) GetAccount(context.Context, *connect.Request[v1.Account]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.AccountService.GetAccount is not implemented"))
 }
 
-func (UnimplementedAccountServiceHandler) GetPublicAccountInfo(context.Context, *connect_go.Request[v1.PublicInfo]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.AccountService.GetPublicAccountInfo is not implemented"))
+func (UnimplementedAccountServiceHandler) GetPublicAccountInfo(context.Context, *connect.Request[v1.PublicInfo]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.AccountService.GetPublicAccountInfo is not implemented"))
 }
 
 // ProfileServiceClient is a client for the test.v1.ProfileService service.
 type ProfileServiceClient interface {
-	GetProfile(context.Context, *connect_go.Request[v1.Profile]) (*connect_go.Response[v1.Response], error)
+	GetProfile(context.Context, *connect.Request[v1.Profile]) (*connect.Response[v1.Response], error)
 }
 
 // NewProfileServiceClient constructs a client for the test.v1.ProfileService service. By default,
@@ -153,30 +159,32 @@ type ProfileServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewProfileServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ProfileServiceClient {
+func NewProfileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ProfileServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	profileServiceMethods := v1.File_test_v1_multi_service_proto.Services().ByName("ProfileService").Methods()
 	return &profileServiceClient{
-		getProfile: connect_go.NewClient[v1.Profile, v1.Response](
+		getProfile: connect.NewClient[v1.Profile, v1.Response](
 			httpClient,
 			baseURL+ProfileServiceGetProfileProcedure,
-			opts...,
+			connect.WithSchema(profileServiceMethods.ByName("GetProfile")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // profileServiceClient implements ProfileServiceClient.
 type profileServiceClient struct {
-	getProfile *connect_go.Client[v1.Profile, v1.Response]
+	getProfile *connect.Client[v1.Profile, v1.Response]
 }
 
 // GetProfile calls test.v1.ProfileService.GetProfile.
-func (c *profileServiceClient) GetProfile(ctx context.Context, req *connect_go.Request[v1.Profile]) (*connect_go.Response[v1.Response], error) {
+func (c *profileServiceClient) GetProfile(ctx context.Context, req *connect.Request[v1.Profile]) (*connect.Response[v1.Response], error) {
 	return c.getProfile.CallUnary(ctx, req)
 }
 
 // ProfileServiceHandler is an implementation of the test.v1.ProfileService service.
 type ProfileServiceHandler interface {
-	GetProfile(context.Context, *connect_go.Request[v1.Profile]) (*connect_go.Response[v1.Response], error)
+	GetProfile(context.Context, *connect.Request[v1.Profile]) (*connect.Response[v1.Response], error)
 }
 
 // NewProfileServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -184,11 +192,13 @@ type ProfileServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	profileServiceGetProfileHandler := connect_go.NewUnaryHandler(
+func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	profileServiceMethods := v1.File_test_v1_multi_service_proto.Services().ByName("ProfileService").Methods()
+	profileServiceGetProfileHandler := connect.NewUnaryHandler(
 		ProfileServiceGetProfileProcedure,
 		svc.GetProfile,
-		opts...,
+		connect.WithSchema(profileServiceMethods.ByName("GetProfile")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.ProfileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -203,13 +213,13 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect_go.Hand
 // UnimplementedProfileServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedProfileServiceHandler struct{}
 
-func (UnimplementedProfileServiceHandler) GetProfile(context.Context, *connect_go.Request[v1.Profile]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.ProfileService.GetProfile is not implemented"))
+func (UnimplementedProfileServiceHandler) GetProfile(context.Context, *connect.Request[v1.Profile]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.ProfileService.GetProfile is not implemented"))
 }
 
 // SettingsServiceClient is a client for the test.v1.SettingsService service.
 type SettingsServiceClient interface {
-	GetSettings(context.Context, *connect_go.Request[v1.Settings]) (*connect_go.Response[v1.Response], error)
+	GetSettings(context.Context, *connect.Request[v1.Settings]) (*connect.Response[v1.Response], error)
 }
 
 // NewSettingsServiceClient constructs a client for the test.v1.SettingsService service. By default,
@@ -219,30 +229,32 @@ type SettingsServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewSettingsServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) SettingsServiceClient {
+func NewSettingsServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) SettingsServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	settingsServiceMethods := v1.File_test_v1_multi_service_proto.Services().ByName("SettingsService").Methods()
 	return &settingsServiceClient{
-		getSettings: connect_go.NewClient[v1.Settings, v1.Response](
+		getSettings: connect.NewClient[v1.Settings, v1.Response](
 			httpClient,
 			baseURL+SettingsServiceGetSettingsProcedure,
-			opts...,
+			connect.WithSchema(settingsServiceMethods.ByName("GetSettings")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // settingsServiceClient implements SettingsServiceClient.
 type settingsServiceClient struct {
-	getSettings *connect_go.Client[v1.Settings, v1.Response]
+	getSettings *connect.Client[v1.Settings, v1.Response]
 }
 
 // GetSettings calls test.v1.SettingsService.GetSettings.
-func (c *settingsServiceClient) GetSettings(ctx context.Context, req *connect_go.Request[v1.Settings]) (*connect_go.Response[v1.Response], error) {
+func (c *settingsServiceClient) GetSettings(ctx context.Context, req *connect.Request[v1.Settings]) (*connect.Response[v1.Response], error) {
 	return c.getSettings.CallUnary(ctx, req)
 }
 
 // SettingsServiceHandler is an implementation of the test.v1.SettingsService service.
 type SettingsServiceHandler interface {
-	GetSettings(context.Context, *connect_go.Request[v1.Settings]) (*connect_go.Response[v1.Response], error)
+	GetSettings(context.Context, *connect.Request[v1.Settings]) (*connect.Response[v1.Response], error)
 }
 
 // NewSettingsServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -250,11 +262,13 @@ type SettingsServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewSettingsServiceHandler(svc SettingsServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	settingsServiceGetSettingsHandler := connect_go.NewUnaryHandler(
+func NewSettingsServiceHandler(svc SettingsServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	settingsServiceMethods := v1.File_test_v1_multi_service_proto.Services().ByName("SettingsService").Methods()
+	settingsServiceGetSettingsHandler := connect.NewUnaryHandler(
 		SettingsServiceGetSettingsProcedure,
 		svc.GetSettings,
-		opts...,
+		connect.WithSchema(settingsServiceMethods.ByName("GetSettings")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.SettingsService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -269,6 +283,6 @@ func NewSettingsServiceHandler(svc SettingsServiceHandler, opts ...connect_go.Ha
 // UnimplementedSettingsServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedSettingsServiceHandler struct{}
 
-func (UnimplementedSettingsServiceHandler) GetSettings(context.Context, *connect_go.Request[v1.Settings]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.SettingsService.GetSettings is not implemented"))
+func (UnimplementedSettingsServiceHandler) GetSettings(context.Context, *connect.Request[v1.Settings]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.SettingsService.GetSettings is not implemented"))
 }

@@ -53,7 +53,7 @@ func (method *Method) Generate() {
 func (method *Method) generatePublic() {
 	file := method.file
 	file.P(util.Indent(1), "return pkg.CheckConfig {")
-	file.P(util.Indent(2), "Type:   pkg.PUBLIC,")
+	file.P(util.Indent(2), "IsPublic:   true,")
 	file.P(util.Indent(2), `Checks: []pkg.Check{},`)
 	file.P(util.Indent(1), "}")
 }
@@ -67,7 +67,7 @@ func (method *Method) generateChecks() {
 	}
 
 	file.P(util.Indent(1), "return pkg.CheckConfig {")
-	file.P(util.Indent(2), "Type:   pkg.SINGLE,")
+	file.P(util.Indent(2), "IsPublic: false,")
 	file.P(util.Indent(2), "Checks: checks,")
 	file.P(util.Indent(1), "}")
 }

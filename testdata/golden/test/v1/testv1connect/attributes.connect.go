@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AttributesName is the fully-qualified name of the Attributes service.
@@ -40,7 +40,7 @@ const (
 
 // AttributesClient is a client for the test.v1.Attributes service.
 type AttributesClient interface {
-	WithAttributes(context.Context, *connect_go.Request[v1.AttributesRequest]) (*connect_go.Response[v1.Response], error)
+	WithAttributes(context.Context, *connect.Request[v1.AttributesRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewAttributesClient constructs a client for the test.v1.Attributes service. By default, it uses
@@ -50,30 +50,32 @@ type AttributesClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAttributesClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AttributesClient {
+func NewAttributesClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AttributesClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	attributesMethods := v1.File_test_v1_attributes_proto.Services().ByName("Attributes").Methods()
 	return &attributesClient{
-		withAttributes: connect_go.NewClient[v1.AttributesRequest, v1.Response](
+		withAttributes: connect.NewClient[v1.AttributesRequest, v1.Response](
 			httpClient,
 			baseURL+AttributesWithAttributesProcedure,
-			opts...,
+			connect.WithSchema(attributesMethods.ByName("WithAttributes")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // attributesClient implements AttributesClient.
 type attributesClient struct {
-	withAttributes *connect_go.Client[v1.AttributesRequest, v1.Response]
+	withAttributes *connect.Client[v1.AttributesRequest, v1.Response]
 }
 
 // WithAttributes calls test.v1.Attributes.WithAttributes.
-func (c *attributesClient) WithAttributes(ctx context.Context, req *connect_go.Request[v1.AttributesRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *attributesClient) WithAttributes(ctx context.Context, req *connect.Request[v1.AttributesRequest]) (*connect.Response[v1.Response], error) {
 	return c.withAttributes.CallUnary(ctx, req)
 }
 
 // AttributesHandler is an implementation of the test.v1.Attributes service.
 type AttributesHandler interface {
-	WithAttributes(context.Context, *connect_go.Request[v1.AttributesRequest]) (*connect_go.Response[v1.Response], error)
+	WithAttributes(context.Context, *connect.Request[v1.AttributesRequest]) (*connect.Response[v1.Response], error)
 }
 
 // NewAttributesHandler builds an HTTP handler from the service implementation. It returns the path
@@ -81,11 +83,13 @@ type AttributesHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAttributesHandler(svc AttributesHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	attributesWithAttributesHandler := connect_go.NewUnaryHandler(
+func NewAttributesHandler(svc AttributesHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	attributesMethods := v1.File_test_v1_attributes_proto.Services().ByName("Attributes").Methods()
+	attributesWithAttributesHandler := connect.NewUnaryHandler(
 		AttributesWithAttributesProcedure,
 		svc.WithAttributes,
-		opts...,
+		connect.WithSchema(attributesMethods.ByName("WithAttributes")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.Attributes/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -100,6 +104,6 @@ func NewAttributesHandler(svc AttributesHandler, opts ...connect_go.HandlerOptio
 // UnimplementedAttributesHandler returns CodeUnimplemented from all methods.
 type UnimplementedAttributesHandler struct{}
 
-func (UnimplementedAttributesHandler) WithAttributes(context.Context, *connect_go.Request[v1.AttributesRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.Attributes.WithAttributes is not implemented"))
+func (UnimplementedAttributesHandler) WithAttributes(context.Context, *connect.Request[v1.AttributesRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.Attributes.WithAttributes is not implemented"))
 }

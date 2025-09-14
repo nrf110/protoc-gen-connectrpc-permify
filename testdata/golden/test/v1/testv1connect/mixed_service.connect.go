@@ -5,9 +5,9 @@
 package testv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	http "net/http"
 	strings "strings"
 	v1 "test/v1"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MixedServiceName is the fully-qualified name of the MixedService service.
@@ -47,13 +47,13 @@ const (
 // MixedServiceClient is a client for the test.v1.MixedService service.
 type MixedServiceClient interface {
 	// Public endpoint - no auth needed
-	GetPublicInfo(context.Context, *connect_go.Request[v1.SimpleRequest]) (*connect_go.Response[v1.Response], error)
+	GetPublicInfo(context.Context, *connect.Request[v1.SimpleRequest]) (*connect.Response[v1.Response], error)
 	// Protected endpoint - requires permission
-	GetUser(context.Context, *connect_go.Request[v1.GetUserResource]) (*connect_go.Response[v1.Response], error)
+	GetUser(context.Context, *connect.Request[v1.GetUserResource]) (*connect.Response[v1.Response], error)
 	// Another protected endpoint with different permission
-	UpdateUser(context.Context, *connect_go.Request[v1.UpdateUserResource]) (*connect_go.Response[v1.Response], error)
+	UpdateUser(context.Context, *connect.Request[v1.UpdateUserResource]) (*connect.Response[v1.Response], error)
 	// Admin only endpoint
-	DeleteUser(context.Context, *connect_go.Request[v1.DeleteUserResource]) (*connect_go.Response[v1.Response], error)
+	DeleteUser(context.Context, *connect.Request[v1.DeleteUserResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewMixedServiceClient constructs a client for the test.v1.MixedService service. By default, it
@@ -63,70 +63,75 @@ type MixedServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMixedServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MixedServiceClient {
+func NewMixedServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MixedServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	mixedServiceMethods := v1.File_test_v1_mixed_service_proto.Services().ByName("MixedService").Methods()
 	return &mixedServiceClient{
-		getPublicInfo: connect_go.NewClient[v1.SimpleRequest, v1.Response](
+		getPublicInfo: connect.NewClient[v1.SimpleRequest, v1.Response](
 			httpClient,
 			baseURL+MixedServiceGetPublicInfoProcedure,
-			opts...,
+			connect.WithSchema(mixedServiceMethods.ByName("GetPublicInfo")),
+			connect.WithClientOptions(opts...),
 		),
-		getUser: connect_go.NewClient[v1.GetUserResource, v1.Response](
+		getUser: connect.NewClient[v1.GetUserResource, v1.Response](
 			httpClient,
 			baseURL+MixedServiceGetUserProcedure,
-			opts...,
+			connect.WithSchema(mixedServiceMethods.ByName("GetUser")),
+			connect.WithClientOptions(opts...),
 		),
-		updateUser: connect_go.NewClient[v1.UpdateUserResource, v1.Response](
+		updateUser: connect.NewClient[v1.UpdateUserResource, v1.Response](
 			httpClient,
 			baseURL+MixedServiceUpdateUserProcedure,
-			opts...,
+			connect.WithSchema(mixedServiceMethods.ByName("UpdateUser")),
+			connect.WithClientOptions(opts...),
 		),
-		deleteUser: connect_go.NewClient[v1.DeleteUserResource, v1.Response](
+		deleteUser: connect.NewClient[v1.DeleteUserResource, v1.Response](
 			httpClient,
 			baseURL+MixedServiceDeleteUserProcedure,
-			opts...,
+			connect.WithSchema(mixedServiceMethods.ByName("DeleteUser")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // mixedServiceClient implements MixedServiceClient.
 type mixedServiceClient struct {
-	getPublicInfo *connect_go.Client[v1.SimpleRequest, v1.Response]
-	getUser       *connect_go.Client[v1.GetUserResource, v1.Response]
-	updateUser    *connect_go.Client[v1.UpdateUserResource, v1.Response]
-	deleteUser    *connect_go.Client[v1.DeleteUserResource, v1.Response]
+	getPublicInfo *connect.Client[v1.SimpleRequest, v1.Response]
+	getUser       *connect.Client[v1.GetUserResource, v1.Response]
+	updateUser    *connect.Client[v1.UpdateUserResource, v1.Response]
+	deleteUser    *connect.Client[v1.DeleteUserResource, v1.Response]
 }
 
 // GetPublicInfo calls test.v1.MixedService.GetPublicInfo.
-func (c *mixedServiceClient) GetPublicInfo(ctx context.Context, req *connect_go.Request[v1.SimpleRequest]) (*connect_go.Response[v1.Response], error) {
+func (c *mixedServiceClient) GetPublicInfo(ctx context.Context, req *connect.Request[v1.SimpleRequest]) (*connect.Response[v1.Response], error) {
 	return c.getPublicInfo.CallUnary(ctx, req)
 }
 
 // GetUser calls test.v1.MixedService.GetUser.
-func (c *mixedServiceClient) GetUser(ctx context.Context, req *connect_go.Request[v1.GetUserResource]) (*connect_go.Response[v1.Response], error) {
+func (c *mixedServiceClient) GetUser(ctx context.Context, req *connect.Request[v1.GetUserResource]) (*connect.Response[v1.Response], error) {
 	return c.getUser.CallUnary(ctx, req)
 }
 
 // UpdateUser calls test.v1.MixedService.UpdateUser.
-func (c *mixedServiceClient) UpdateUser(ctx context.Context, req *connect_go.Request[v1.UpdateUserResource]) (*connect_go.Response[v1.Response], error) {
+func (c *mixedServiceClient) UpdateUser(ctx context.Context, req *connect.Request[v1.UpdateUserResource]) (*connect.Response[v1.Response], error) {
 	return c.updateUser.CallUnary(ctx, req)
 }
 
 // DeleteUser calls test.v1.MixedService.DeleteUser.
-func (c *mixedServiceClient) DeleteUser(ctx context.Context, req *connect_go.Request[v1.DeleteUserResource]) (*connect_go.Response[v1.Response], error) {
+func (c *mixedServiceClient) DeleteUser(ctx context.Context, req *connect.Request[v1.DeleteUserResource]) (*connect.Response[v1.Response], error) {
 	return c.deleteUser.CallUnary(ctx, req)
 }
 
 // MixedServiceHandler is an implementation of the test.v1.MixedService service.
 type MixedServiceHandler interface {
 	// Public endpoint - no auth needed
-	GetPublicInfo(context.Context, *connect_go.Request[v1.SimpleRequest]) (*connect_go.Response[v1.Response], error)
+	GetPublicInfo(context.Context, *connect.Request[v1.SimpleRequest]) (*connect.Response[v1.Response], error)
 	// Protected endpoint - requires permission
-	GetUser(context.Context, *connect_go.Request[v1.GetUserResource]) (*connect_go.Response[v1.Response], error)
+	GetUser(context.Context, *connect.Request[v1.GetUserResource]) (*connect.Response[v1.Response], error)
 	// Another protected endpoint with different permission
-	UpdateUser(context.Context, *connect_go.Request[v1.UpdateUserResource]) (*connect_go.Response[v1.Response], error)
+	UpdateUser(context.Context, *connect.Request[v1.UpdateUserResource]) (*connect.Response[v1.Response], error)
 	// Admin only endpoint
-	DeleteUser(context.Context, *connect_go.Request[v1.DeleteUserResource]) (*connect_go.Response[v1.Response], error)
+	DeleteUser(context.Context, *connect.Request[v1.DeleteUserResource]) (*connect.Response[v1.Response], error)
 }
 
 // NewMixedServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -134,26 +139,31 @@ type MixedServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMixedServiceHandler(svc MixedServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	mixedServiceGetPublicInfoHandler := connect_go.NewUnaryHandler(
+func NewMixedServiceHandler(svc MixedServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	mixedServiceMethods := v1.File_test_v1_mixed_service_proto.Services().ByName("MixedService").Methods()
+	mixedServiceGetPublicInfoHandler := connect.NewUnaryHandler(
 		MixedServiceGetPublicInfoProcedure,
 		svc.GetPublicInfo,
-		opts...,
+		connect.WithSchema(mixedServiceMethods.ByName("GetPublicInfo")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mixedServiceGetUserHandler := connect_go.NewUnaryHandler(
+	mixedServiceGetUserHandler := connect.NewUnaryHandler(
 		MixedServiceGetUserProcedure,
 		svc.GetUser,
-		opts...,
+		connect.WithSchema(mixedServiceMethods.ByName("GetUser")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mixedServiceUpdateUserHandler := connect_go.NewUnaryHandler(
+	mixedServiceUpdateUserHandler := connect.NewUnaryHandler(
 		MixedServiceUpdateUserProcedure,
 		svc.UpdateUser,
-		opts...,
+		connect.WithSchema(mixedServiceMethods.ByName("UpdateUser")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mixedServiceDeleteUserHandler := connect_go.NewUnaryHandler(
+	mixedServiceDeleteUserHandler := connect.NewUnaryHandler(
 		MixedServiceDeleteUserProcedure,
 		svc.DeleteUser,
-		opts...,
+		connect.WithSchema(mixedServiceMethods.ByName("DeleteUser")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/test.v1.MixedService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -174,18 +184,18 @@ func NewMixedServiceHandler(svc MixedServiceHandler, opts ...connect_go.HandlerO
 // UnimplementedMixedServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedMixedServiceHandler struct{}
 
-func (UnimplementedMixedServiceHandler) GetPublicInfo(context.Context, *connect_go.Request[v1.SimpleRequest]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.MixedService.GetPublicInfo is not implemented"))
+func (UnimplementedMixedServiceHandler) GetPublicInfo(context.Context, *connect.Request[v1.SimpleRequest]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.MixedService.GetPublicInfo is not implemented"))
 }
 
-func (UnimplementedMixedServiceHandler) GetUser(context.Context, *connect_go.Request[v1.GetUserResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.MixedService.GetUser is not implemented"))
+func (UnimplementedMixedServiceHandler) GetUser(context.Context, *connect.Request[v1.GetUserResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.MixedService.GetUser is not implemented"))
 }
 
-func (UnimplementedMixedServiceHandler) UpdateUser(context.Context, *connect_go.Request[v1.UpdateUserResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.MixedService.UpdateUser is not implemented"))
+func (UnimplementedMixedServiceHandler) UpdateUser(context.Context, *connect.Request[v1.UpdateUserResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.MixedService.UpdateUser is not implemented"))
 }
 
-func (UnimplementedMixedServiceHandler) DeleteUser(context.Context, *connect_go.Request[v1.DeleteUserResource]) (*connect_go.Response[v1.Response], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("test.v1.MixedService.DeleteUser is not implemented"))
+func (UnimplementedMixedServiceHandler) DeleteUser(context.Context, *connect.Request[v1.DeleteUserResource]) (*connect.Response[v1.Response], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("test.v1.MixedService.DeleteUser is not implemented"))
 }

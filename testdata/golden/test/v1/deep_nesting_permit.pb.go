@@ -26,8 +26,8 @@ func (req *DeepNestedRequest) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -55,7 +55,7 @@ func (req *VeryDeepResource) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }

@@ -6,8 +6,8 @@ import (
 
 func (req *SimpleRequest) GetChecks() pkg.CheckConfig {
 	return pkg.CheckConfig{
-		Type:   pkg.PUBLIC,
-		Checks: []pkg.Check{},
+		IsPublic: true,
+		Checks:   []pkg.Check{},
 	}
 }
 
@@ -32,8 +32,8 @@ func (req *GetUserResource) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -63,8 +63,8 @@ func (req *UpdateUserResource) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }
 
@@ -89,7 +89,7 @@ func (req *DeleteUserResource) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }

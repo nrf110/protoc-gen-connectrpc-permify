@@ -18,21 +18,21 @@ func (req *ComplexResource) GetChecks() pkg.CheckConfig {
 	}
 	attributes := make(map[string]any)
 	var categoryValues []any
-	for _, mp9o25urbv := range resource.Attributes {
-		categoryValues = append(categoryValues, mp9o25urbv.Category)
+	for _, v1 := range resource.Attributes {
+		categoryValues = append(categoryValues, v1.Category)
 	}
 	if len(categoryValues) > 0 {
 		attributes["category"] = categoryValues
 	}
+	attributes["department"] = resource.Department
 	var priorityValues []any
-	for _, ptwauf := range resource.Attributes {
-		priorityValues = append(priorityValues, ptwauf.Priority)
+	for _, v2 := range resource.Attributes {
+		priorityValues = append(priorityValues, v2.Priority)
 	}
 	if len(priorityValues) > 0 {
 		attributes["priority"] = priorityValues
 	}
 	attributes["tags"] = resource.Tags
-	attributes["department"] = resource.Department
 	check := pkg.Check{
 		TenantID:   tenantId,
 		Permission: permission,
@@ -44,7 +44,7 @@ func (req *ComplexResource) GetChecks() pkg.CheckConfig {
 	}
 	checks = append(checks, check)
 	return pkg.CheckConfig{
-		Type:   pkg.SINGLE,
-		Checks: checks,
+		IsPublic: false,
+		Checks:   checks,
 	}
 }

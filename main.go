@@ -28,6 +28,9 @@ func buildModel(plugin *protogen.Plugin, file *protogen.File) {
 		return
 	}
 
+	// Reset the variable counter for each file to ensure deterministic output
+	util.ResetVariableCounter()
+
 	filename := file.GeneratedFilenamePrefix + "_permit.pb.go"
 	gen := plugin.NewGeneratedFile(filename, file.GoImportPath)
 	gen.QualifiedGoIdent(protogen.GoIdent{
