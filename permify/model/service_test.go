@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	connectpermify "github.com/nrf110/connectrpc-permify/pkg"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -57,7 +56,6 @@ func TestServiceWithSingleMethod(t *testing.T) {
 	method := &Method{
 		IsPublic:    true,
 		RequestType: "SingleRequest",
-		CheckType:   connectpermify.PUBLIC,
 	}
 
 	service := &Service{
@@ -80,28 +78,24 @@ func TestServiceWithMultipleMethods(t *testing.T) {
 		{
 			IsPublic:    true,
 			RequestType: "PublicRequest",
-			CheckType:   connectpermify.PUBLIC,
 		},
 		{
 			IsPublic:    false,
 			Permission:  "read",
 			RequestType: "ReadRequest",
 			Resource:    &Resource{Type: "Document"},
-			CheckType:   connectpermify.SINGLE,
 		},
 		{
 			IsPublic:    false,
 			Permission:  "write",
 			RequestType: "WriteRequest",
 			Resource:    &Resource{Type: "Document"},
-			CheckType:   connectpermify.SINGLE,
 		},
 		{
 			IsPublic:    false,
 			Permission:  "admin",
 			RequestType: "AdminRequest",
 			Resource:    &Resource{Type: "System"},
-			CheckType:   connectpermify.SINGLE,
 		},
 	}
 
@@ -120,7 +114,6 @@ func TestServiceWithMultipleMethods(t *testing.T) {
 		assert.Equal(t, expectedMethod.IsPublic, service.Methods[i].IsPublic)
 		assert.Equal(t, expectedMethod.RequestType, service.Methods[i].RequestType)
 		assert.Equal(t, expectedMethod.Permission, service.Methods[i].Permission)
-		assert.Equal(t, expectedMethod.CheckType, service.Methods[i].CheckType)
 	}
 }
 

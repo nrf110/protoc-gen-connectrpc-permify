@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	permifyv1 "github.com/nrf110/connectrpc-permify/gen/nrf110/permify/v1"
-	connectpermify "github.com/nrf110/connectrpc-permify/pkg"
 	"github.com/nrf110/protoc-gen-connectrpc-permify/permify/util"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -15,7 +14,6 @@ type Method struct {
 	Permission  string
 	RequestType string
 	Resource    *Resource
-	CheckType   connectpermify.CheckType
 }
 
 func NewMethod(plugin *protogen.Plugin, file *protogen.GeneratedFile, pb *protogen.Method) *Method {

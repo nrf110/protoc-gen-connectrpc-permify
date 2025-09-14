@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	connectpermify "github.com/nrf110/connectrpc-permify/pkg"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -22,7 +21,6 @@ func TestMethodStruct(t *testing.T) {
 		Permission:  "read",
 		RequestType: "UserRequest",
 		Resource:    mockResource,
-		CheckType:   connectpermify.SINGLE,
 	}
 
 	// Verify all fields are set correctly
@@ -31,7 +29,6 @@ func TestMethodStruct(t *testing.T) {
 	assert.Equal(t, "read", method.Permission)
 	assert.Equal(t, "UserRequest", method.RequestType)
 	assert.Equal(t, mockResource, method.Resource)
-	assert.Equal(t, connectpermify.SINGLE, method.CheckType)
 }
 
 func TestMethodPublicMethod(t *testing.T) {
@@ -44,13 +41,11 @@ func TestMethodPublicMethod(t *testing.T) {
 		Permission:  "", // Public methods don't need permissions
 		RequestType: "PublicRequest",
 		Resource:    nil, // Public methods don't need resources
-		CheckType:   connectpermify.PUBLIC,
 	}
 
 	assert.True(t, publicMethod.IsPublic)
 	assert.Empty(t, publicMethod.Permission)
 	assert.Nil(t, publicMethod.Resource)
-	assert.Equal(t, connectpermify.PUBLIC, publicMethod.CheckType)
 }
 
 func TestMethodProtectedMethod(t *testing.T) {
@@ -67,14 +62,12 @@ func TestMethodProtectedMethod(t *testing.T) {
 		Permission:  "write",
 		RequestType: "DocumentRequest",
 		Resource:    mockResource,
-		CheckType:   connectpermify.SINGLE,
 	}
 
 	assert.False(t, protectedMethod.IsPublic)
 	assert.Equal(t, "write", protectedMethod.Permission)
 	assert.NotNil(t, protectedMethod.Resource)
 	assert.Equal(t, "Document", protectedMethod.Resource.Type)
-	assert.Equal(t, connectpermify.SINGLE, protectedMethod.CheckType)
 }
 
 func TestMethodGenerate(t *testing.T) {
@@ -316,41 +309,6 @@ func TestMethodResourceAssociation(t *testing.T) {
 			assert.Equal(t, resource, method.Resource)
 			assert.Equal(t, resource.Type, method.Resource.Type)
 			assert.Equal(t, resource.GoName, method.Resource.GoName)
-		})
-	}
-}
-
-func TestMethodCheckTypeHandling(t *testing.T) {
-	// Test different CheckType values
-	mockFile := &protogen.GeneratedFile{}
-
-	tests := []struct {
-		name      string
-		isPublic  bool
-		checkType connectpermify.CheckType
-	}{
-		{
-			name:      "public method",
-			isPublic:  true,
-			checkType: connectpermify.PUBLIC,
-		},
-		{
-			name:      "single check method",
-			isPublic:  false,
-			checkType: connectpermify.SINGLE,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			method := &Method{
-				file:      mockFile,
-				IsPublic:  tt.isPublic,
-				CheckType: tt.checkType,
-			}
-
-			assert.Equal(t, tt.checkType, method.CheckType)
-			assert.Equal(t, tt.isPublic, method.IsPublic)
 		})
 	}
 }
